@@ -97,11 +97,15 @@ class FirebaseApi{
     }
   }
 
+  Future<String?> getFCMToken() async {
+    final fcmToken = await _firebaseMessaging.getToken();
+    return fcmToken;
+  }
+
   initNotification() async {
     await _firebaseMessaging.requestPermission();
     await setupFlutterNotifications();
     final fcmToken = await _firebaseMessaging.getToken();
-    print('Token: $fcmToken');
     initLocalNotification();
     initPushNotification();
   }

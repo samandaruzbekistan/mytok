@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mytok/firebase_api.dart';
 import 'package:mytok/screens/sms_code.dart';
 import 'package:mytok/utils/colors.dart';
+import 'package:http/http.dart' as http;
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 class RegPage extends StatefulWidget {
   const RegPage({super.key});
@@ -12,9 +15,11 @@ class RegPage extends StatefulWidget {
 class _RegPageState extends State<RegPage> {
   late Color myColor;
   late Size mediaSize;
-  TextEditingController emailController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
   bool rememberUser = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -87,10 +92,10 @@ class _RegPageState extends State<RegPage> {
         // _buildGreyText("MyTok tezkor va sifatli xizmat"),
         const SizedBox(height: 60),
         _buildGreyText("Ism familya"),
-        _buildNameInputField(emailController),
+        _buildNameInputField(nameController),
         const SizedBox(height: 20),
         _buildGreyText("Telefon"),
-        _buildInputField(emailController),
+        _buildInputField(phoneController),
         const SizedBox(height: 20),
         _buildGreyText("Parol"),
         _buildInputField(passwordController, isPassword: true),
@@ -143,9 +148,28 @@ class _RegPageState extends State<RegPage> {
 
   Widget _buildLoginButton() {
     return ElevatedButton(
-      onPressed: () {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const SmsCode()));
+      onPressed: () async {
+        final firebaseApi = FirebaseApi();
+        final fcmToken = await firebaseApi.getFCMToken();
+        var request = http.MultipartRequest('POST', Uri.parse('https://metest.uz/API/'));
+        request.fields.addAll({
+          'username': 'YOUR-NAME',
+          'phonenumber': 'YOUR-PHONE-NUMBER',
+          'fmctoken': 'YOUR-FMS-TOKEN',
+          'password': 'YOUR-PASSWORD'
+        });
+
+
+        http.StreamedResponse response = await request.send();
+
+        if (response.statusCode == 200) {
+          print(await response.stream.bytesToString());
+        }
+        else {
+          print(response.reasonPhrase);
+        }
+        // Navigator.push(context,
+        //     MaterialPageRoute(builder: (context) => const SmsCode()));
       },
       style: ElevatedButton.styleFrom(
         shape: const StadiumBorder(),
