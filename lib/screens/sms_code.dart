@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:mytok/screens/home_screen.dart';
 import 'package:mytok/utils/colors.dart';
 import 'package:http/http.dart' as http;
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../firebase_api.dart';
 
@@ -143,9 +145,17 @@ class _SmsCodeState extends State<SmsCode> {
             var res = await response.stream.bytesToString();
             Map valueMap = json.decode(res);
             if(valueMap['success'] == true){
-
+              box.put('name', name);
+              box.put('phone', phone);
+              box.put('password', password);
+              box.put('id', valueMap['user_id']);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => HomePage()));
             }
           }
+        }
+        else{
+          _loginError(context);
         }
       },
       style: ElevatedButton.styleFrom(
@@ -179,4 +189,25 @@ class _SmsCodeState extends State<SmsCode> {
       ),
     );
   }
+}
+
+
+_loginError(context) {
+  Alert(
+    context: context,
+    type: AlertType.error,
+    title: "Xatolik!",
+    desc: "Tasdiqlash kodi xato",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
 }

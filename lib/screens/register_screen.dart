@@ -155,6 +155,8 @@ class _RegPageState extends State<RegPage> {
     return ElevatedButton(
       onPressed: () async {
         if ((phoneController.text.length == 12) && (phoneController.text.startsWith("998"))) {
+
+
           var request = http.MultipartRequest('POST', Uri.parse('https://metest.uz/API/checkphonenumber.php'));
           request.fields.addAll({
             'phonenumber': '${phoneController.text}'
@@ -194,7 +196,7 @@ class _RegPageState extends State<RegPage> {
             }
           }
           else {
-            _internetError(context);
+            _apiError(context);
           }
         }
         else{
@@ -261,6 +263,26 @@ _internetError(context) {
     type: AlertType.error,
     title: "Xatolik!",
     desc: "Internetga ulanmagansiz",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
+}
+
+_apiError(context) {
+  Alert(
+    context: context,
+    type: AlertType.error,
+    title: "Xatolik!",
+    desc: "API da nosozlik",
     buttons: [
       DialogButton(
         child: Text(
