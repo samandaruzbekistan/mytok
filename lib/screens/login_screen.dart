@@ -146,8 +146,6 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildLoginButton() {
     return ElevatedButton(
       onPressed: () async {
-        debugPrint("Email : ${emailController.text}");
-        debugPrint("Password : ${passwordController.text}");
         if ((emailController.text.length == 12) && (emailController.text.startsWith("998"))) {
           var request = http.MultipartRequest('POST', Uri.parse('https://metest.uz/API/loginAPI.php'));
           request.fields.addAll({
@@ -162,11 +160,11 @@ class _LoginPageState extends State<LoginPage> {
               _onBasicAlertPressed(context);
             }
             else{
-
+              //  Login success
             }
           }
           else {
-            print(response.reasonPhrase);
+            //  API da nosozlik uchun
           }
         }
         else{

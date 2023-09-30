@@ -1,9 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:mytok/utils/colors.dart';
+import 'package:http/http.dart' as http;
+
+import '../firebase_api.dart';
 
 class SmsCode extends StatefulWidget {
-  const SmsCode({super.key});
-
+  const SmsCode({super.key, required this.code});
+  final String code;
   @override
   State<SmsCode> createState() => _SmsCodeState();
 }
@@ -14,6 +20,7 @@ class _SmsCodeState extends State<SmsCode> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool rememberUser = false;
+  var box = Hive.box('users');
 
   @override
   Widget build(BuildContext context) {
@@ -117,9 +124,29 @@ class _SmsCodeState extends State<SmsCode> {
 
   Widget _buildLoginButton() {
     return ElevatedButton(
-      onPressed: () {
-        debugPrint("Email : ${emailController.text}");
-        debugPrint("Password : ${passwordController.text}");
+      onPressed: () async {
+        final firebaseApi = FirebaseApi();
+        final fcmToken = await firebaseApi.getFCMToken();
+        if(widget.code == emailController.text){
+          var name = box.get('temp_name');
+          var phone = box.get('temp_phone');
+          var password = box.get('temp_password');
+          var request = http.MultipartRequest('POST', Uri.parse('https://metest.uz/API/'));
+          request.fields.addAll({
+            'username': '${name}',
+            'phonenumber': '${phone}',
+            'fmctoken': '${fcmToken}',
+            'password': '${password}'
+          });
+          http.StreamedResponse response = await request.send();
+          if (response.statusCode == 200) {
+            var res = await response.stream.bytesToString();
+            Map valueMap = json.decode(res);
+            if(valueMap['success'] == true){
+
+            }
+          }
+        }
       },
       style: ElevatedButton.styleFrom(
         shape: const StadiumBorder(),

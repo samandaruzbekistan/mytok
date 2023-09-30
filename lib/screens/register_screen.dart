@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:mytok/firebase_api.dart';
 import 'package:mytok/screens/sms_code.dart';
 import 'package:mytok/utils/colors.dart';
@@ -14,12 +18,13 @@ class RegPage extends StatefulWidget {
 
 class _RegPageState extends State<RegPage> {
   late Color myColor;
+  var box = Hive.box('users');
   late Size mediaSize;
   TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
   bool rememberUser = false;
-
+  final random = Random();
 
   @override
   Widget build(BuildContext context) {
@@ -149,27 +154,52 @@ class _RegPageState extends State<RegPage> {
   Widget _buildLoginButton() {
     return ElevatedButton(
       onPressed: () async {
-        final firebaseApi = FirebaseApi();
-        final fcmToken = await firebaseApi.getFCMToken();
-        var request = http.MultipartRequest('POST', Uri.parse('https://metest.uz/API/'));
-        request.fields.addAll({
-          'username': 'YOUR-NAME',
-          'phonenumber': 'YOUR-PHONE-NUMBER',
-          'fmctoken': 'YOUR-FMS-TOKEN',
-          'password': 'YOUR-PASSWORD'
-        });
+        if ((phoneController.text.length == 12) && (phoneController.text.startsWith("998"))) {
+          var request = http.MultipartRequest('POST', Uri.parse('https://metest.uz/API/checkphonenumber.php'));
+          request.fields.addAll({
+            'phonenumber': '${phoneController.text}'
+          });
 
 
-        http.StreamedResponse response = await request.send();
+          http.StreamedResponse response = await request.send();
 
-        if (response.statusCode == 200) {
-          print(await response.stream.bytesToString());
+          if (response.statusCode == 200) {
+            var res = await response.stream.bytesToString();
+            Map valueMap = json.decode(res);
+            if(valueMap['registered'] == false){
+              box.put('temp_name', nameController.text);
+              box.put('temp_phone', phoneController.text);
+              box.put('temp_password', passwordController.text);
+              final sixDigitNumber = random.nextInt(900000) + 100000;
+              var request2 = http.MultipartRequest('POST', Uri.parse('https://markaz.ideal-study.uz/api/sendSms'));
+              request2.fields.addAll({
+                'phone': '${phoneController.text}',
+                'code' : '${sixDigitNumber}'
+              });
+              http.StreamedResponse response2 = await request2.send();
+              if (response.statusCode == 200) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SmsCode(code: '${sixDigitNumber}'),
+                  ),
+                );
+              }
+              else{
+                _internetError(context);
+              }
+            }
+            else if(valueMap['registered'] == true){
+              _loginError(context);
+            }
+          }
+          else {
+            _internetError(context);
+          }
         }
-        else {
-          print(response.reasonPhrase);
+        else{
+          _onBasicAlertPressedValidate(context);
         }
-        // Navigator.push(context,
-        //     MaterialPageRoute(builder: (context) => const SmsCode()));
       },
       style: ElevatedButton.styleFrom(
         shape: const StadiumBorder(),
@@ -202,4 +232,65 @@ class _RegPageState extends State<RegPage> {
       ),
     );
   }
+}
+
+
+_onBasicAlertPressedValidate(context) {
+  Alert(
+    context: context,
+    type: AlertType.info,
+    title: "Xatolik!",
+    desc: "Telefon raqamni quidagicha kiriting:\n998 XX XXX XX XX",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
+}
+
+_internetError(context) {
+  Alert(
+    context: context,
+    type: AlertType.error,
+    title: "Xatolik!",
+    desc: "Internetga ulanmagansiz",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
+}
+
+_loginError(context) {
+  Alert(
+    context: context,
+    type: AlertType.warning,
+    title: "Xatolik!",
+    desc: "Raqam ro'yhatdan o'tgan",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
 }
