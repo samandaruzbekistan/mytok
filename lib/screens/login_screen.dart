@@ -159,7 +159,7 @@ class _LoginPageState extends State<LoginPage> {
             if(valueMap['success'] == false){
               _onBasicAlertPressed(context);
             }
-            else{
+            else if(valueMap['success'] == true){
               //  Login success
             }
           }
