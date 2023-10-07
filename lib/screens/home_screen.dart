@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mytok/screens/electr_categories.dart';
+import 'package:mytok/screens/profile.dart';
 import 'package:mytok/utils/colors.dart';
 
 class HomePage extends StatelessWidget {
@@ -33,6 +34,12 @@ class HomePage extends StatelessWidget {
                     //   size: 30,
                     //   color: Colors.white,
                     // ),
+                    Row(
+                      children: [
+                        Icon(Icons.location_on_outlined, size: 18),
+                        Text("Sirdaryo", style: TextStyle(fontSize: 18),)
+                      ],
+                    ),
                     Icon(
                       Icons.notifications,
                       size: 30,
@@ -40,27 +47,27 @@ class HomePage extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(
-                  height: 20,
-                ),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(left: 3, bottom: 15),
-                      child: Text(
-                        "MyTok",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 30,
-                            color: AppColors.black,
-                            letterSpacing: 1,
-                            wordSpacing: 1),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                ),
+                // const SizedBox(
+                //   height: 20,
+                // ),
+                // const Row(
+                //   mainAxisAlignment: MainAxisAlignment.center,
+                //   children: [
+                //     Padding(
+                //       padding: EdgeInsets.only(left: 3, bottom: 15),
+                //       child: Text(
+                //         "MyTok",
+                //         style: TextStyle(
+                //             fontWeight: FontWeight.w600,
+                //             fontSize: 30,
+                //             color: AppColors.black,
+                //             letterSpacing: 1,
+                //             wordSpacing: 1),
+                //         textAlign: TextAlign.center,
+                //       ),
+                //     ),
+                //   ],
+                // ),
               ],
             ),
           ),
@@ -68,10 +75,10 @@ class HomePage extends StatelessWidget {
             padding: EdgeInsets.only(top: 20, left: 15, right: 15),
             child: Column(
               children: [
-                Text('Xizmatlarimiz', style: TextStyle(fontSize: 20),),
-                SizedBox(
-                  height: 20,
-                ),
+                // Text('Xizmatlarimiz', style: TextStyle(fontSize: 20),),
+                // SizedBox(
+                //   height: 20,
+                // ),
                 InkWell(
                   onTap: () {
                     Navigator.push(context,
@@ -142,8 +149,9 @@ class HomePage extends StatelessWidget {
               // Navigate to HomeScreen
 
               break;
-            case 2:
-              // Navigate to HomeScreen
+            case 3:
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const Profile()));
 
               break;
             default:

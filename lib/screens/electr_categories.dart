@@ -264,6 +264,41 @@ class ElectrCategories extends StatelessWidget {
           ],
         ),
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        showUnselectedLabels: true,
+        iconSize: 25,
+        selectedItemColor: AppColors.black,
+        selectedFontSize: 18,
+        currentIndex: 0,
+        unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          // Handle navigation based on the tapped index
+          switch (index) {
+            case 1:
+            // Navigate to HomeScreen
+
+              break;
+            case 2:
+            // Navigate to HomeScreen
+
+              break;
+            case 3:
+            // Navigate to HomeScreen
+
+              break;
+            default:
+            // Do nothing
+              break;
+          }
+        },
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: "Tarix"),
+          BottomNavigationBarItem(icon: Icon(Icons.call), label: "Bog'lanish"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.person), label: "Profil"),
+        ],
+      ),
     );
   }
 }
