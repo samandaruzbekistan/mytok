@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:mytok/screens/home_screen.dart';
 import 'package:mytok/utils/colors.dart';
 import 'package:http/http.dart' as http;
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -20,6 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController passwordController = TextEditingController();
   bool rememberUser = false;
   var box = Hive.box('users');
+  bool _isLoading=false;
   @override
   Widget build(BuildContext context) {
     myColor = Theme.of(context).primaryColor;
@@ -146,29 +149,58 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildLoginButton() {
     return ElevatedButton(
       onPressed: () async {
+        final connectivityResult = await (Connectivity().checkConnectivity());
         if ((emailController.text.length == 12) && (emailController.text.startsWith("998"))) {
-          var request = http.MultipartRequest('POST', Uri.parse('https://metest.uz/API/loginAPI.php'));
-          request.fields.addAll({
-            'phonenumber': '${emailController.text}',
-            'password': '${passwordController.text}'
-          });
-          http.StreamedResponse response = await request.send();
-          if (response.statusCode == 200) {
-            var res = await response.stream.bytesToString();
-            Map valueMap = json.decode(res);
-            if(valueMap['success'] == false){
-              _onBasicAlertPressed(context);
+          if (connectivityResult != ConnectivityResult.none){
+            var request = http.MultipartRequest('POST', Uri.parse('https://metest.uz/API/loginAPI.php'));
+            request.fields.addAll({
+              'phonenumber': '${emailController.text}',
+              'password': '${passwordController.text}'
+            });
+            setState(() {
+              _isLoading = true;
+            });
+            http.StreamedResponse response = await request.send();
+            if (response.statusCode == 200) {
+              var res = await response.stream.bytesToString();
+              Map valueMap = json.decode(res);
+              if(valueMap['success'] == false){
+                _onBasicAlertPressed(context);
+                setState(() {
+                  _isLoading = false;
+                });
+              }
+              else if(valueMap['success'] == true){
+                box.put('id', valueMap['data']['id']);
+                box.put('name', valueMap['data']['username']);
+                box.put('phone', valueMap['data']['phonenumber']);
+                box.put('password', '${passwordController.text}');
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => HomePage()));
+                setState(() {
+                  _isLoading = false;
+                });
+              }
             }
-            else if(valueMap['success'] == true){
-              //  Login success
+            else {
+              setState(() {
+                _isLoading = false;
+              });
+              _apiError(context);
             }
           }
-          else {
-            //  API da nosozlik uchun
+          else{
+            _internetError(context);
+            setState(() {
+              _isLoading = false;
+            });
           }
         }
         else{
-          _onBasicAlertPressedValidate(context);
+          _onBasicAlertPressedValidatePassword(context);
+          setState(() {
+            _isLoading = false;
+          });
         }
 
       },
@@ -178,7 +210,7 @@ class _LoginPageState extends State<LoginPage> {
         backgroundColor: AppColors.black,
         minimumSize: const Size.fromHeight(60),
       ),
-      child: const Text(
+      child: _isLoading? const CircularProgressIndicator(color: Colors.white,) :const Text(
         "KIRISH",
         style: TextStyle(color: AppColors.white),
       ),
@@ -226,12 +258,73 @@ _onBasicAlertPressed(context) {
   ).show();
 }
 
-_onBasicAlertPressedValidate(context) {
+
+_onBasicAlertPressedValidatePassword(context) {
+  Alert(
+    context: context,
+    type: AlertType.info,
+    title: "Xatolik!",
+    desc: "Parol 8 ta belgidan iborat bo'lsin",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
+}
+
+_onBasicAlertPressedValidatePhone(context) {
   Alert(
     context: context,
     type: AlertType.info,
     title: "Xatolik!",
     desc: "Telefon raqamni quidagicha kiriting:\n998 XX XXX XX XX",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
+}
+
+_internetError(context) {
+  Alert(
+    context: context,
+    type: AlertType.error,
+    title: "Xatolik!",
+    desc: "Internetga ulanmagansiz",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
+}
+
+_apiError(context) {
+  Alert(
+    context: context,
+    type: AlertType.error,
+    title: "Xatolik!",
+    desc: "API da nosozlik",
     buttons: [
       DialogButton(
         child: Text(

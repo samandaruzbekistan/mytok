@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mytok/screens/electr_categories.dart';
 import 'package:mytok/utils/colors.dart';
 
 class HomePage extends StatelessWidget {
@@ -35,7 +36,7 @@ class HomePage extends StatelessWidget {
                     Icon(
                       Icons.notifications,
                       size: 30,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                   ],
                 ),
@@ -51,7 +52,7 @@ class HomePage extends StatelessWidget {
                         "MyTok",
                         style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            fontSize: 25,
+                            fontSize: 30,
                             color: AppColors.black,
                             letterSpacing: 1,
                             wordSpacing: 1),
@@ -67,185 +68,57 @@ class HomePage extends StatelessWidget {
             padding: EdgeInsets.only(top: 20, left: 15, right: 15),
             child: Column(
               children: [
-                Text('Bizning ilovamizda'),
-                SizedBox(
-                  height: 10,
-                ),
-                GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    childAspectRatio: 1.1,
-                  ),
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: 6,
-                  // Assuming you have 6 categories/icons
-                  itemBuilder: (context, index) {
-                    // Create the categories directly without using separate lists
-                    List<String> catNames = [
-                      "Darslar",
-                      "Kitoblar",
-                      "Testlar",
-                      "Krossvordlar",
-                      "Qo'llanmalar",
-                      "Ustozlar"
-                    ];
-                    List<Color> catColors = [
-                      Color(0xFFFFCF2F),
-                      Color(0xFF6FE08D),
-                      Color(0xFF61BDFD),
-                      Color(0xFFFC7C7F),
-                      Color(0xFFCB84FB),
-                      Color(0xFF78E667),
-                    ];
-                    List<Icon> catIcons = [
-                      Icon(Icons.play_lesson, color: Colors.white, size: 30),
-                      Icon(Icons.book, color: Colors.white, size: 30),
-                      Icon(Icons.quiz, color: Colors.white, size: 30),
-                      Icon(Icons.abc_sharp, color: Colors.white, size: 30),
-                      Icon(Icons.insert_drive_file_outlined,
-                          color: Colors.white, size: 30),
-                      Icon(Icons.school, color: Colors.white, size: 30),
-                    ];
-
-                    return Column(
-                      children: [
-                        Container(
-                          height: 60,
-                          width: 60,
-                          decoration: BoxDecoration(
-                            color: catColors[index],
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: catIcons[index],
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          catNames[index],
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black.withOpacity(0.7),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
+                Text('Xizmatlarimiz', style: TextStyle(fontSize: 20),),
                 SizedBox(
                   height: 20,
                 ),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Kurslar",
-                      style:
-                          TextStyle(fontSize: 23, fontWeight: FontWeight.w600),
+                InkWell(
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => const ElectrCategories()));
+                  },
+                  child: Container(
+                    width: (MediaQuery.of(context).size.width),
+                    padding:
+                        EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Color(0xFFF5F3FF)),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 80),
+                          child: Image.asset("assets/images/electr.png"),
+                        ),
+                        SizedBox(height: 20,),
+                        Text("Elektr ishlari", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),)
+                      ],
                     ),
-                    Text(
-                      "Barchasi",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF674AEF),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
                 SizedBox(
                   height: 10,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    InkWell(
-                      onTap: () {},
-                      child: Container(
-                        width: (MediaQuery.of(context).size.width / 2.3),
-                        padding:
-                            EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: Color(0xFFF5F3FF)),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Image.asset("assets/images/1.jpg"),
-                            ),
-                          ],
+                InkWell(
+                  onTap: () {},
+                  child: Container(
+                    width: (MediaQuery.of(context).size.width),
+                    padding:
+                    EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Color(0xFFF5F3FF)),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 80),
+                          child: Image.asset("assets/images/plumbing.png"),
                         ),
-                      ),
+                        SizedBox(height: 20,),
+                        Text("Santexnika ishlari", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),)
+                      ],
                     ),
-                    InkWell(
-                      onTap: () {},
-                      child: Container(
-                        width: (MediaQuery.of(context).size.width / 2.3),
-                        padding:
-                            EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: Color(0xFFF5F3FF)),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Image.asset("assets/images/2.jpg"),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    InkWell(
-                      onTap: () {},
-                      child: Container(
-                        width: (MediaQuery.of(context).size.width / 2.3),
-                        padding:
-                            EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: Color(0xFFF5F3FF)),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Image.asset("assets/images/3.jpg"),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {},
-                      child: Container(
-                        width: (MediaQuery.of(context).size.width / 2.3),
-                        padding:
-                            EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: Color(0xFFF5F3FF)),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Image.asset("assets/images/4.jpg"),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
                 SizedBox(
                   height: 10,
@@ -258,7 +131,7 @@ class HomePage extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         showUnselectedLabels: true,
         iconSize: 25,
-        selectedItemColor: Color(0xFF674AEF),
+        selectedItemColor: AppColors.black,
         selectedFontSize: 18,
         currentIndex: 0,
         unselectedItemColor: Colors.grey,
@@ -280,10 +153,10 @@ class HomePage extends StatelessWidget {
         },
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.school), label: "Ustozlar"),
-          // BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Bog'lanish"),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: "Tarix"),
+          BottomNavigationBarItem(icon: Icon(Icons.call), label: "Bog'lanish"),
           BottomNavigationBarItem(
-              icon: Icon(Icons.developer_board), label: "Dasturchi"),
+              icon: Icon(Icons.person), label: "Profil"),
         ],
       ),
     );

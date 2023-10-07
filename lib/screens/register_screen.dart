@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
-
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:mytok/firebase_api.dart';
@@ -26,6 +26,7 @@ class _RegPageState extends State<RegPage> {
   bool rememberUser = false;
   final random = Random();
 
+
   @override
   Widget build(BuildContext context) {
     myColor = Theme.of(context).primaryColor;
@@ -37,7 +38,7 @@ class _RegPageState extends State<RegPage> {
           image: const AssetImage("assets/images/logo.png"),
           fit: BoxFit.cover,
           colorFilter:
-          ColorFilter.mode(myColor.withOpacity(0.2), BlendMode.dstATop),
+              ColorFilter.mode(myColor.withOpacity(0.2), BlendMode.dstATop),
         ),
       ),
       child: Scaffold(
@@ -72,9 +73,9 @@ class _RegPageState extends State<RegPage> {
         color: AppColors.white,
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(30),
-              topRight: Radius.circular(30),
-            )),
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        )),
         child: Padding(
           padding: const EdgeInsets.all(32.0),
           child: _buildForm(),
@@ -135,7 +136,9 @@ class _RegPageState extends State<RegPage> {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
-        suffixIcon: isPassword ? Icon(Icons.remove_red_eye) : Icon(Icons.account_circle_outlined),
+        suffixIcon: isPassword
+            ? Icon(Icons.remove_red_eye)
+            : Icon(Icons.account_circle_outlined),
       ),
       obscureText: isPassword,
     );
@@ -154,52 +157,49 @@ class _RegPageState extends State<RegPage> {
   Widget _buildLoginButton() {
     return ElevatedButton(
       onPressed: () async {
-        if ((phoneController.text.length == 12) && (phoneController.text.startsWith("998"))) {
-
-
-          var request = http.MultipartRequest('POST', Uri.parse('https://metest.uz/API/checkphonenumber.php'));
-          request.fields.addAll({
-            'phonenumber': '${phoneController.text}'
-          });
-
-
-          http.StreamedResponse response = await request.send();
-
-          if (response.statusCode == 200) {
-            var res = await response.stream.bytesToString();
-            Map valueMap = json.decode(res);
-            if(valueMap['registered'] == false){
-              box.put('temp_name', nameController.text);
-              box.put('temp_phone', phoneController.text);
-              box.put('temp_password', passwordController.text);
-              final sixDigitNumber = random.nextInt(900000) + 100000;
-              var request2 = http.MultipartRequest('POST', Uri.parse('https://markaz.ideal-study.uz/api/sendSms'));
-              request2.fields.addAll({
-                'phone': '${phoneController.text}',
-                'code' : '${sixDigitNumber}'
-              });
-              http.StreamedResponse response2 = await request2.send();
-              if (response.statusCode == 200) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SmsCode(code: '${sixDigitNumber}'),
-                  ),
-                );
+        final connectivityResult = await (Connectivity().checkConnectivity());
+        if ((phoneController.text.length == 12) &&
+            (phoneController.text.startsWith("998"))) {
+          if (connectivityResult != ConnectivityResult.none) {
+            var request = http.MultipartRequest('POST',
+                Uri.parse('https://metest.uz/API/checkphonenumber.php'));
+            request.fields.addAll({'phonenumber': '${phoneController.text}'});
+            http.StreamedResponse response = await request.send();
+            if (response.statusCode == 200) {
+              var res = await response.stream.bytesToString();
+              Map valueMap = json.decode(res);
+              if (valueMap['registered'] == false) {
+                box.put('temp_name', nameController.text);
+                box.put('temp_phone', phoneController.text);
+                box.put('temp_password', passwordController.text);
+                final sixDigitNumber = random.nextInt(900000) + 100000;
+                var request2 = http.MultipartRequest('POST',
+                    Uri.parse('https://markaz.ideal-study.uz/api/sendSms'));
+                request2.fields.addAll({
+                  'phone': '${phoneController.text}',
+                  'code': '${sixDigitNumber}'
+                });
+                http.StreamedResponse response2 = await request2.send();
+                if (response.statusCode == 200) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SmsCode(code: '${sixDigitNumber}'),
+                    ),
+                  );
+                } else {
+                  _apiError(context);
+                }
+              } else if (valueMap['registered'] == true) {
+                _loginError(context);
               }
-              else{
-                _internetError(context);
-              }
+            } else {
+              _apiError(context);
             }
-            else if(valueMap['registered'] == true){
-              _loginError(context);
-            }
+          } else {
+            _internetError(context);
           }
-          else {
-            _apiError(context);
-          }
-        }
-        else{
+        } else {
           _onBasicAlertPressedValidate(context);
         }
       },
@@ -235,7 +235,6 @@ class _RegPageState extends State<RegPage> {
     );
   }
 }
-
 
 _onBasicAlertPressedValidate(context) {
   Alert(

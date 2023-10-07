@@ -130,6 +130,7 @@ class _SmsCodeState extends State<SmsCode> {
         final firebaseApi = FirebaseApi();
         final fcmToken = await firebaseApi.getFCMToken();
         if(widget.code == emailController.text){
+          print(5);
           var name = box.get('temp_name');
           var phone = box.get('temp_phone');
           var password = box.get('temp_password');
@@ -143,6 +144,7 @@ class _SmsCodeState extends State<SmsCode> {
           http.StreamedResponse response = await request.send();
           if (response.statusCode == 200) {
             var res = await response.stream.bytesToString();
+            print(res);
             Map valueMap = json.decode(res);
             if(valueMap['success'] == true){
               box.put('name', name);
@@ -152,6 +154,9 @@ class _SmsCodeState extends State<SmsCode> {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => HomePage()));
             }
+          }
+          else{
+
           }
         }
         else{

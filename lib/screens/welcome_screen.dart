@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mytok/screens/electr_categories.dart';
 import 'package:mytok/screens/register_screen.dart';
 import 'package:mytok/screens/web_socket_test.dart';
 import 'package:mytok/utils/colors.dart';
@@ -39,7 +40,7 @@ class WelcomeScreen extends StatelessWidget {
               GestureDetector(
                 onTap: (){
                   // Navigator.push(context,
-                  //     MaterialPageRoute(builder: (context) => const WebSocket()));
+                  //     MaterialPageRoute(builder: (context) => const ElectrCategories()));
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => const LoginPage()));
                 },
