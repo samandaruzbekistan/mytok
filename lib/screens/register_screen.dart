@@ -25,7 +25,7 @@ class _RegPageState extends State<RegPage> {
   TextEditingController phoneController = TextEditingController();
   bool rememberUser = false;
   final random = Random();
-
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +101,7 @@ class _RegPageState extends State<RegPage> {
         _buildNameInputField(nameController),
         const SizedBox(height: 20),
         _buildGreyText("Telefon"),
-        _buildInputField(phoneController),
+        _buildPhoneInputField(phoneController),
         const SizedBox(height: 20),
         _buildGreyText("Parol"),
         _buildInputField(passwordController, isPassword: true),
@@ -124,6 +124,18 @@ class _RegPageState extends State<RegPage> {
       {isPassword = false}) {
     return TextField(
       controller: controller,
+      decoration: InputDecoration(
+        suffixIcon: isPassword ? Icon(Icons.remove_red_eye) : Icon(Icons.phone),
+      ),
+      obscureText: isPassword,
+    );
+  }
+
+  Widget _buildPhoneInputField(TextEditingController controller,
+      {isPassword = false}) {
+    return TextField(
+      controller: controller,
+      keyboardType: TextInputType.number,
       decoration: InputDecoration(
         suffixIcon: isPassword ? Icon(Icons.remove_red_eye) : Icon(Icons.phone),
       ),
@@ -164,6 +176,9 @@ class _RegPageState extends State<RegPage> {
             var request = http.MultipartRequest('POST',
                 Uri.parse('https://metest.uz/API/checkphonenumber.php'));
             request.fields.addAll({'phonenumber': '${phoneController.text}'});
+            setState(() {
+              _isLoading = true;
+            });
             http.StreamedResponse response = await request.send();
             if (response.statusCode == 200) {
               var res = await response.stream.bytesToString();
@@ -188,12 +203,21 @@ class _RegPageState extends State<RegPage> {
                     ),
                   );
                 } else {
+                  setState(() {
+                    _isLoading = false;
+                  });
                   _apiError(context);
                 }
               } else if (valueMap['registered'] == true) {
+                setState(() {
+                  _isLoading = false;
+                });
                 _loginError(context);
               }
             } else {
+              setState(() {
+                _isLoading = false;
+              });
               _apiError(context);
             }
           } else {
@@ -209,10 +233,14 @@ class _RegPageState extends State<RegPage> {
         backgroundColor: AppColors.black,
         minimumSize: const Size.fromHeight(60),
       ),
-      child: const Text(
-        "RO'YHATDAN O'TISH",
-        style: TextStyle(color: AppColors.white),
-      ),
+      child: _isLoading
+          ? const CircularProgressIndicator(
+              color: Colors.white,
+            )
+          : const Text(
+              "Ro'yhatdan o'tish",
+              style: TextStyle(color: AppColors.white),
+            ),
     );
   }
 

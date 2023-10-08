@@ -8,6 +8,8 @@ import 'package:mytok/utils/colors.dart';
 import 'package:http/http.dart' as http;
 import 'package:rflutter_alert/rflutter_alert.dart';
 
+import '../firebase_api.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -22,7 +24,8 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController passwordController = TextEditingController();
   bool rememberUser = false;
   var box = Hive.box('users');
-  bool _isLoading=false;
+  bool _isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     myColor = Theme.of(context).primaryColor;
@@ -149,61 +152,79 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildLoginButton() {
     return ElevatedButton(
       onPressed: () async {
+        final firebaseApi = FirebaseApi();
+        final fcmToken = await firebaseApi.getFCMToken();
         final connectivityResult = await (Connectivity().checkConnectivity());
-        if ((emailController.text.length == 12) && (emailController.text.startsWith("998"))) {
-          if (connectivityResult != ConnectivityResult.none){
-            var request = http.MultipartRequest('POST', Uri.parse('https://metest.uz/API/loginAPI.php'));
-            request.fields.addAll({
-              'phonenumber': '${emailController.text}',
-              'password': '${passwordController.text}'
-            });
-            setState(() {
-              _isLoading = true;
-            });
-            http.StreamedResponse response = await request.send();
-            if (response.statusCode == 200) {
-              var res = await response.stream.bytesToString();
-              Map valueMap = json.decode(res);
-              print(valueMap);
-              if(valueMap['success'] == false){
-                _onBasicAlertPressed(context);
+        if ((emailController.text.length == 12) &&
+            (emailController.text.startsWith("998"))) {
+          if (passwordController.text.length < 8) {
+            _onBasicAlertPressedValidatePassword(context);
+          } else {
+            if (connectivityResult != ConnectivityResult.none) {
+              var request = http.MultipartRequest(
+                  'POST', Uri.parse('https://metest.uz/API/loginAPI.php'));
+              request.fields.addAll({
+                'phonenumber': '${emailController.text}',
+                'password': '${passwordController.text}'
+              });
+              setState(() {
+                _isLoading = true;
+              });
+              http.StreamedResponse response = await request.send();
+              if (response.statusCode == 200) {
+                var res = await response.stream.bytesToString();
+                Map valueMap = json.decode(res);
+                if (valueMap['success'] == false) {
+                  _onBasicAlertPressed(context);
+                  setState(() {
+                    _isLoading = false;
+                  });
+                } else if (valueMap['success'] == true) {
+                  var request2 = http.MultipartRequest(
+                      'POST', Uri.parse('https://metest.uz/API/fmctokenupdate.php'));
+                  request2.fields.addAll({
+                    'id': valueMap['data']['id'],
+                    'fmctoken': '${fcmToken}'
+                  });
+                  var res2 = await response.stream.bytesToString();
+                  Map valueMap2 = json.decode(res2);
+                  if(valueMap2['message'] == "Yangilanish muvaffaqiyatli"){
+                    box.put('id', valueMap['data']['id']);
+                    box.put('name', valueMap['data']['username']);
+                    box.put('phone', valueMap['data']['phonenumber']);
+                    box.put('password', '${passwordController.text}');
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => HomePage()));
+                    setState(() {
+                      _isLoading = false;
+                    });
+                  }
+                  else{
+                    _apiError(context);
+                    setState(() {
+                      _isLoading = false;
+                    });
+                  }
+                }
+              } else {
                 setState(() {
                   _isLoading = false;
                 });
+                _apiError(context);
               }
-              else if(valueMap['success'] == true){
-                box.put('id', valueMap['data']['id']);
-                box.put('name', valueMap['data']['username']);
-                box.put('phone', valueMap['data']['phonenumber']);
-                box.put('password', '${passwordController.text}');
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => HomePage()));
-                setState(() {
-                  _isLoading = false;
-                });
-              }
-            }
-            else {
+            } else {
+              _internetError(context);
               setState(() {
                 _isLoading = false;
               });
-              _apiError(context);
             }
           }
-          else{
-            _internetError(context);
-            setState(() {
-              _isLoading = false;
-            });
-          }
-        }
-        else{
-          _onBasicAlertPressedValidatePassword(context);
+        } else {
+          _onBasicAlertPressedValidatePhone(context);
           setState(() {
             _isLoading = false;
           });
         }
-
       },
       style: ElevatedButton.styleFrom(
         shape: const StadiumBorder(),
@@ -211,33 +232,17 @@ class _LoginPageState extends State<LoginPage> {
         backgroundColor: AppColors.black,
         minimumSize: const Size.fromHeight(60),
       ),
-      child: _isLoading? const CircularProgressIndicator(color: Colors.white,) :const Text(
-        "KIRISH",
-        style: TextStyle(color: AppColors.white),
-      ),
-    );
-  }
-
-  Widget _buildOtherLogin() {
-    return Center(
-      child: Column(
-        children: [
-          _buildGreyText("Or Login with"),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Tab(icon: Image.asset("assets/images/facebook.png")),
-              Tab(icon: Image.asset("assets/images/twitter.png")),
-              Tab(icon: Image.asset("assets/images/github.png")),
-            ],
-          )
-        ],
-      ),
+      child: _isLoading
+          ? const CircularProgressIndicator(
+              color: Colors.white,
+            )
+          : const Text(
+              "KIRISH",
+              style: TextStyle(color: AppColors.white),
+            ),
     );
   }
 }
-
 
 _onBasicAlertPressed(context) {
   Alert(
@@ -258,7 +263,6 @@ _onBasicAlertPressed(context) {
     ],
   ).show();
 }
-
 
 _onBasicAlertPressedValidatePassword(context) {
   Alert(

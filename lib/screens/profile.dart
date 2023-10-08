@@ -1,17 +1,35 @@
+import 'dart:convert';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:mytok/screens/home_screen.dart';
-import 'package:mytok/screens/welcome_screen.dart';
+import 'package:http/http.dart' as http;
 import 'package:mytok/utils/colors.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
-class Profile extends StatelessWidget {
+class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);
+
+  @override
+  State<Profile> createState() => _ProfileState();
+}
+
+class _ProfileState extends State<Profile> {
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     var w = MediaQuery.of(context).size.width;
     var box = Hive.box('users');
+    var name = "${box.get("phone")}";
+    TextEditingController nameController = TextEditingController()
+      ..text = "${box.get('name')}";
+    TextEditingController phoneController = TextEditingController()
+      ..text = "${box.get('phone')}";
+
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -34,31 +52,32 @@ class Profile extends StatelessWidget {
                 height: 25,
               ),
               TextFormField(
-                initialValue: box.get("name"),
+                controller: nameController,
                 decoration: InputDecoration(
                     label: const Text("F.I.Sh"),
                     suffixIcon: const Icon(Icons.person_outline_rounded),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(100)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(100)),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(100),
-                      borderSide: const BorderSide(width: 2, color: Colors.grey)
-                    )
-                ),
+                        borderRadius: BorderRadius.circular(100),
+                        borderSide:
+                            const BorderSide(width: 2, color: Colors.grey))),
               ),
               const SizedBox(
                 height: 18,
               ),
-              TextFormField(
-                initialValue: box.get("phone"),
+              TextField(
+                controller: phoneController,
+                readOnly: true,
                 decoration: InputDecoration(
                     label: const Text("Telefon"),
                     suffixIcon: const Icon(Icons.person_outline_rounded),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(100)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(100)),
                     focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(100),
-                        borderSide: const BorderSide(width: 2, color: Colors.grey)
-                    )
-                ),
+                        borderSide:
+                            const BorderSide(width: 2, color: Colors.grey))),
               ),
               const SizedBox(
                 height: 25,
@@ -66,14 +85,63 @@ class Profile extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: (){},
+                  onPressed: () async {
+                    final connectivityResult =
+                        await (Connectivity().checkConnectivity());
+                    if ((phoneController.text.length == 12) &&
+                        (phoneController.text.startsWith("998"))) {
+                      if (connectivityResult != ConnectivityResult.none) {
+                        var request = http.MultipartRequest(
+                            'POST',
+                            Uri.parse(
+                                'https://metest.uz/API/updateuserdata.php'));
+                        request.fields.addAll({
+                          'phonenumber': '${phoneController.text}',
+                          'username': '${nameController.text}',
+                          'userid': '${box.get('id')}'
+                        });
+                        setState(() {
+                          _isLoading = true;
+                        });
+                        http.StreamedResponse response = await request.send();
+
+                        if (response.statusCode == 200) {
+                          var res = await response.stream.bytesToString();
+                          Map valueMap = json.decode(res);
+                          setState(() {
+                            _isLoading = false;
+                          });
+                          box.put('name', nameController.text);
+                          _onBasicAlertSuccess(context);
+                          // box.put('phone', phoneController.text);
+                        } else {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                          _apiError(context);
+                        }
+                      } else {
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        _internetError(context);
+                      }
+                    } else {
+                      _onBasicAlertPressedValidatePhone(context);
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.yellow,
-                    side: BorderSide.none,
-                    shape: const StadiumBorder(),
-                    padding: const EdgeInsets.symmetric(vertical: 10)
+                      backgroundColor: AppColors.yellow,
+                      side: BorderSide.none,
+                      shape: const StadiumBorder(),
+                      padding: const EdgeInsets.symmetric(vertical: 10)),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(
+                    color: Colors.black)
+                      : const Text(
+                    "Yangilash",
+                    style: TextStyle(color: AppColors.black, fontWeight: FontWeight.bold, fontSize: 20),
                   ),
-                  child: const Text("Yangilash", style: TextStyle(color: AppColors.black, fontWeight: FontWeight.bold, fontSize:20),),
                 ),
               ),
               const SizedBox(
@@ -82,7 +150,7 @@ class Profile extends StatelessWidget {
               SizedBox(
                 // width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: (){
+                  onPressed: () {
                     box.clear();
                     SystemNavigator.pop();
                   },
@@ -92,9 +160,12 @@ class Profile extends StatelessWidget {
                       foregroundColor: Colors.red,
                       side: BorderSide.none,
                       shape: const StadiumBorder(),
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10)
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 10)),
+                  child: const Text(
+                    "Chiqish",
+                    style: TextStyle(fontSize: 20),
                   ),
-                  child: const Text("Chiqish", style: TextStyle(fontSize:20),),
                 ),
               )
             ],
@@ -112,27 +183,107 @@ class Profile extends StatelessWidget {
           // Handle navigation based on the tapped index
           switch (index) {
             case 1:
-            // Navigate to HomeScreen
+              // Navigate to HomeScreen
 
               break;
             case 0:
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => HomePage()));
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => HomePage()));
 
               break;
             default:
-            // Do nothing
+              // Do nothing
               break;
           }
         },
-        items:const  [
+        items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: "Tarix"),
           BottomNavigationBarItem(icon: Icon(Icons.call), label: "Bog'lanish"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.person), label: "Profil"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
         ],
       ),
     );
   }
+}
+
+_onBasicAlertPressedValidatePhone(context) {
+  Alert(
+    context: context,
+    type: AlertType.info,
+    title: "Xatolik!",
+    desc: "Telefon raqamni quidagicha kiriting:\n998 XX XXX XX XX",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
+}
+
+
+_onBasicAlertSuccess(context) {
+  Alert(
+    context: context,
+    type: AlertType.success,
+    title: "Xabar!",
+    desc: "Sizning malumotlaringiz o'zgartirildi",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
+}
+
+_internetError(context) {
+  Alert(
+    context: context,
+    type: AlertType.error,
+    title: "Xatolik!",
+    desc: "Internetga ulanmagansiz",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
+}
+
+_apiError(context) {
+  Alert(
+    context: context,
+    type: AlertType.error,
+    title: "Xatolik!",
+    desc: "API da nosozlik",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
 }

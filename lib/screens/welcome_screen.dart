@@ -3,7 +3,6 @@ import 'package:mytok/screens/electr_categories.dart';
 import 'package:mytok/screens/register_screen.dart';
 import 'package:mytok/screens/web_socket_test.dart';
 import 'package:mytok/utils/colors.dart';
-import 'reg_screen.dart';
 import 'login_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {

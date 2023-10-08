@@ -11,7 +11,9 @@ import '../firebase_api.dart';
 
 class SmsCode extends StatefulWidget {
   const SmsCode({super.key, required this.code});
+
   final String code;
+
   @override
   State<SmsCode> createState() => _SmsCodeState();
 }
@@ -23,6 +25,7 @@ class _SmsCodeState extends State<SmsCode> {
   TextEditingController passwordController = TextEditingController();
   bool rememberUser = false;
   var box = Hive.box('users');
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +38,7 @@ class _SmsCodeState extends State<SmsCode> {
           image: const AssetImage("assets/images/logo.png"),
           fit: BoxFit.cover,
           colorFilter:
-          ColorFilter.mode(myColor.withOpacity(0.2), BlendMode.dstATop),
+              ColorFilter.mode(myColor.withOpacity(0.2), BlendMode.dstATop),
         ),
       ),
       child: Scaffold(
@@ -70,9 +73,9 @@ class _SmsCodeState extends State<SmsCode> {
         color: AppColors.white,
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(30),
-              topRight: Radius.circular(30),
-            )),
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        )),
         child: Padding(
           padding: const EdgeInsets.all(32.0),
           child: _buildForm(),
@@ -112,13 +115,15 @@ class _SmsCodeState extends State<SmsCode> {
     );
   }
 
-
   Widget _buildNameInputField(TextEditingController controller,
       {isPassword = false}) {
     return TextField(
       controller: controller,
+      keyboardType: TextInputType.number,
       decoration: InputDecoration(
-        suffixIcon: isPassword ? Icon(Icons.remove_red_eye) : Icon(Icons.password_outlined),
+        suffixIcon: isPassword
+            ? Icon(Icons.remove_red_eye)
+            : Icon(Icons.password_outlined),
       ),
       obscureText: isPassword,
     );
@@ -129,12 +134,15 @@ class _SmsCodeState extends State<SmsCode> {
       onPressed: () async {
         final firebaseApi = FirebaseApi();
         final fcmToken = await firebaseApi.getFCMToken();
-        if(widget.code == emailController.text){
-          print(5);
+        if (widget.code == emailController.text) {
+          setState(() {
+            _isLoading = true;
+          });
           var name = box.get('temp_name');
           var phone = box.get('temp_phone');
           var password = box.get('temp_password');
-          var request = http.MultipartRequest('POST', Uri.parse('https://metest.uz/API/'));
+          var request = http.MultipartRequest(
+              'POST', Uri.parse('https://metest.uz/API/'));
           request.fields.addAll({
             'username': '${name}',
             'phonenumber': '${phone}',
@@ -146,20 +154,19 @@ class _SmsCodeState extends State<SmsCode> {
             var res = await response.stream.bytesToString();
             print(res);
             Map valueMap = json.decode(res);
-            if(valueMap['success'] == true){
+            if (valueMap['success'] == true) {
               box.put('name', name);
               box.put('phone', phone);
               box.put('password', password);
               box.put('id', valueMap['user_id']);
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => HomePage()));
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => HomePage()));
             }
-          }
-          else{
-
-          }
-        }
-        else{
+          } else {}
+        } else {
+          setState(() {
+            _isLoading = false;
+          });
           _loginError(context);
         }
       },
@@ -169,10 +176,14 @@ class _SmsCodeState extends State<SmsCode> {
         backgroundColor: AppColors.black,
         minimumSize: const Size.fromHeight(60),
       ),
-      child: const Text(
-        "TASDIQLASH",
-        style: TextStyle(color: AppColors.white),
-      ),
+      child: _isLoading
+          ? const CircularProgressIndicator(
+              color: Colors.white,
+            )
+          : const Text(
+              "TASDIQLASH",
+              style: TextStyle(color: AppColors.white),
+            ),
     );
   }
 
@@ -195,7 +206,6 @@ class _SmsCodeState extends State<SmsCode> {
     );
   }
 }
-
 
 _loginError(context) {
   Alert(
