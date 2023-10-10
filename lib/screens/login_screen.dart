@@ -189,7 +189,7 @@ class _LoginPageState extends State<LoginPage> {
                   http.StreamedResponse response2 = await request2.send();
                   var res2 = await response2.stream.bytesToString();
                   Map valueMap2 = json.decode(res2);
-                  if(valueMap2['message'] == "Yangilanish muvaffaqiyatli"){
+                  if((valueMap2['message'] == "Hech qanday yozuv yangilanmagan.") || (valueMap2['message'] == "Yangilanish muvaffaqiyatli")){
                     box.put('id', valueMap['data']['id']);
                     box.put('name', valueMap['data']['username']);
                     box.put('phone', valueMap['data']['phonenumber']);

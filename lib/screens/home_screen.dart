@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mytok/screens/electr_categories.dart';
+import 'package:mytok/screens/orders.dart';
 import 'package:mytok/screens/profile.dart';
+import 'package:mytok/screens/success_page/success_page_view.dart';
 import 'package:mytok/screens/test_location.dart';
 import 'package:mytok/utils/colors.dart';
 
@@ -149,12 +151,16 @@ class HomePage extends StatelessWidget {
           // Handle navigation based on the tapped index
           switch (index) {
             case 1:
-              // Navigate to HomeScreen
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => MyOrders()));
 
               break;
             case 3:
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => const Profile()));
+            case 2:
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const CheckCart()));
 
               break;
             default:
