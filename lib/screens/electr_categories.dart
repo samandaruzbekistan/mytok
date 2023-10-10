@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mytok/screens/order_screen.dart';
 import 'package:mytok/utils/colors.dart';
 
 class ElectrCategories extends StatelessWidget {
@@ -9,7 +10,7 @@ class ElectrCategories extends StatelessWidget {
     var w = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Elektr xizmatlari"),
+        title: const Text("Elektr xizmatlari"),
         backgroundColor: AppColors.yellow,
       ),
       body: Container(
@@ -20,13 +21,18 @@ class ElectrCategories extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
-                  color: Color(0xe5e7e7e7),
+                  color: const Color(0xe5e7e7e7),
                   borderRadius: BorderRadius.circular(25)),
               child: GestureDetector(
                 onTap: () {
-                  Navigator.pushNamed(context, '/pdf1');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Order(),
+                    ),
+                  );
                 },
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,7 +72,7 @@ class ElectrCategories extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             Container(
@@ -116,11 +122,11 @@ class ElectrCategories extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 10,),
+            const SizedBox(height: 10,),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
-                  color: Color(0xe5e7e7e7),
+                  color: const Color(0xe5e7e7e7),
                   borderRadius: BorderRadius.circular(25)),
               child: GestureDetector(
                 onTap: () {
@@ -164,11 +170,11 @@ class ElectrCategories extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 10,),
+            const SizedBox(height: 10,),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
-                  color: Color(0xe5e7e7e7),
+                  color: const Color(0xe5e7e7e7),
                   borderRadius: BorderRadius.circular(25)),
               child: GestureDetector(
                 onTap: () {
@@ -212,11 +218,11 @@ class ElectrCategories extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 10,),
+            const SizedBox(height: 10,),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
-                  color: Color(0xd5e7e7e7),
+                  color: const Color(0xd5e7e7e7),
                   borderRadius: BorderRadius.circular(25)),
               child: GestureDetector(
                 onTap: () {
@@ -260,7 +266,7 @@ class ElectrCategories extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 10,),
+            const SizedBox(height: 10,),
           ],
         ),
       ),
@@ -291,7 +297,7 @@ class ElectrCategories extends StatelessWidget {
               break;
           }
         },
-        items: [
+        items:const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: "Tarix"),
           BottomNavigationBarItem(icon: Icon(Icons.call), label: "Bog'lanish"),

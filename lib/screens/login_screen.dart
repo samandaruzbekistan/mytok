@@ -183,10 +183,11 @@ class _LoginPageState extends State<LoginPage> {
                   var request2 = http.MultipartRequest(
                       'POST', Uri.parse('https://metest.uz/API/fmctokenupdate.php'));
                   request2.fields.addAll({
-                    'id': valueMap['data']['id'],
+                    'id': "${valueMap['data']['id']}",
                     'fmctoken': '${fcmToken}'
                   });
-                  var res2 = await response.stream.bytesToString();
+                  http.StreamedResponse response2 = await request2.send();
+                  var res2 = await response2.stream.bytesToString();
                   Map valueMap2 = json.decode(res2);
                   if(valueMap2['message'] == "Yangilanish muvaffaqiyatli"){
                     box.put('id', valueMap['data']['id']);

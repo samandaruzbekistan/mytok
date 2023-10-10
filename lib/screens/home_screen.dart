@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mytok/screens/electr_categories.dart';
 import 'package:mytok/screens/profile.dart';
+import 'package:mytok/screens/test_location.dart';
 import 'package:mytok/utils/colors.dart';
 
 class HomePage extends StatelessWidget {
@@ -81,6 +82,8 @@ class HomePage extends StatelessWidget {
                 // ),
                 InkWell(
                   onTap: () {
+                    // Navigator.push(context,
+                    //     MaterialPageRoute(builder: (context) => const TextLocation()));
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => const ElectrCategories()));
                   },
