@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:mytok/screens/home_screen.dart';
+import 'package:mytok/screens/reset%20password/get_phone.dart';
 import 'package:mytok/utils/colors.dart';
 import 'package:http/http.dart' as http;
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -144,7 +145,13 @@ class _LoginPageState extends State<LoginPage> {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         TextButton(
-            onPressed: () {}, child: _buildGreyText("Parol esingizda yo'qmi?"))
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => GetPhone()),
+              );
+            }, child: _buildGreyText("Parolni unutdingizmi?"))
       ],
     );
   }
