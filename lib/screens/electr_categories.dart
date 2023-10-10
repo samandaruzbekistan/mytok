@@ -1,13 +1,25 @@
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:mytok/screens/order_screen.dart';
+import 'package:mytok/screens/profile.dart';
 import 'package:mytok/utils/colors.dart';
 
-class ElectrCategories extends StatelessWidget {
+import 'contact.dart';
+import 'orders.dart';
+
+class ElectrCategories extends StatefulWidget {
   const ElectrCategories({Key? key}) : super(key: key);
 
   @override
+  State<ElectrCategories> createState() => _ElectrCategoriesState();
+}
+
+class _ElectrCategoriesState extends State<ElectrCategories> {
+  @override
   Widget build(BuildContext context) {
+    GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
     var w = MediaQuery.of(context).size.width;
+    var h = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Elektr xizmatlari"),
@@ -317,39 +329,33 @@ class ElectrCategories extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        showUnselectedLabels: true,
-        iconSize: 25,
-        selectedItemColor: AppColors.black,
-        selectedFontSize: 18,
-        currentIndex: 0,
-        unselectedItemColor: Colors.grey,
+      bottomNavigationBar: CurvedNavigationBar(
+        key: _bottomNavigationKey,
+        index: 0,
+        height: h*0.08,
+        items: <Widget>[
+          Icon(Icons.home, size: 30),
+          Icon(Icons.history, size: 30),
+          Icon(Icons.phone, size: 30),
+          Icon(Icons.person, size: 30),
+        ],
+        color: Colors.yellow,
+        buttonBackgroundColor: Colors.yellow,
+        backgroundColor: Colors.white,
+        animationCurve: Curves.ease,
+        animationDuration: Duration(milliseconds: 400),
         onTap: (index) {
-          // Handle navigation based on the tapped index
-          switch (index) {
-            case 1:
-              // Navigate to HomeScreen
-
-              break;
-            case 2:
-              // Navigate to HomeScreen
-
-              break;
-            case 3:
-              // Navigate to HomeScreen
-
-              break;
-            default:
-              // Do nothing
-              break;
+          if(index == 1){
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => MyOrders()));
+          }
+          else if(index == 2){
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => ContactScreen()));
+          }
+          else if(index == 3){
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => Profile()));
           }
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: "Tarix"),
-          BottomNavigationBarItem(icon: Icon(Icons.call), label: "Bog'lanish"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
-        ],
+        letIndexChange: (index) => true,
       ),
     );
   }

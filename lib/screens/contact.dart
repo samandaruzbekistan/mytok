@@ -2,32 +2,28 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:mytok/screens/home_screen.dart';
 import 'package:mytok/screens/profile.dart';
-import 'package:mytok/utils/colors.dart';
 
-import 'contact.dart';
+import 'orders.dart';
 
-class MyOrders extends StatefulWidget {
-  const MyOrders({Key? key,}) : super(key: key);
+class ContactScreen extends StatefulWidget {
+  const ContactScreen({Key? key}) : super(key: key);
+
   @override
-  State<MyOrders> createState() => _MyOrdersState();
+  State<ContactScreen> createState() => _ContactScreenState();
 }
 
-class _MyOrdersState extends State<MyOrders> {
+class _ContactScreenState extends State<ContactScreen> {
   GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     var h = MediaQuery.of(context).size.height;
     return Scaffold(
-      appBar: AppBar(title: Text("Buyurtmalarim"), backgroundColor: AppColors.yellow,),
-      body: SingleChildScrollView(
-        child: Container(
-          child: Text("adsfasd"),
-        ),
-      ),
+      appBar: AppBar(title: Text("Contact"),),
+      body: Container(),
       bottomNavigationBar: CurvedNavigationBar(
         key: _bottomNavigationKey,
-        index: 1,
+        index: 2,
         height: h*0.08,
         items: <Widget>[
           Icon(Icons.home, size: 30),
@@ -41,11 +37,11 @@ class _MyOrdersState extends State<MyOrders> {
         animationCurve: Curves.ease,
         animationDuration: Duration(milliseconds: 400),
         onTap: (index) {
-          if(index == 0){
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
+          if(index == 1){
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => MyOrders()));
           }
-          else if(index == 2){
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => ContactScreen()));
+          else if(index == 0){
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
           }
           else if(index == 3){
             Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => Profile()));

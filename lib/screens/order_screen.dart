@@ -159,7 +159,7 @@ class _OrderState extends State<Order> {
                           setState(() {
                             _isLoading = false;
                           });
-                          _success(context);
+                          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => CheckCart()));
                         }
                       }
                     }
@@ -249,8 +249,7 @@ _success(context) {
           "OK",
           style: TextStyle(color: Colors.white, fontSize: 14),
         ),
-        onPressed: () => Navigator.push(context,
-            MaterialPageRoute(builder: (context) => CheckCart())),
+        onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => CheckCart())),
         color: AppColors.black,
         radius: BorderRadius.circular(0.0),
       ),

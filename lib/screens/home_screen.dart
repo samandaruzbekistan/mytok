@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:mytok/screens/contact.dart';
 import 'package:mytok/screens/electr_categories.dart';
 import 'package:mytok/screens/orders.dart';
 import 'package:mytok/screens/profile.dart';
-import 'package:mytok/screens/success_page/success_page_view.dart';
-import 'package:mytok/screens/test_location.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:mytok/utils/colors.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
+
+  @override
   Widget build(BuildContext context) {
+    var h = MediaQuery.of(context).size.height;
     return Scaffold(
       body: ListView(
         children: [
@@ -140,42 +148,72 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        showUnselectedLabels: true,
-        iconSize: 25,
-        selectedItemColor: AppColors.black,
-        selectedFontSize: 18,
-        currentIndex: 0,
-        unselectedItemColor: Colors.grey,
+      bottomNavigationBar: CurvedNavigationBar(
+        key: _bottomNavigationKey,
+        index: 0,
+        height: h*0.08,
+        items: <Widget>[
+          Icon(Icons.home, size: 30),
+          Icon(Icons.history, size: 30),
+          Icon(Icons.phone, size: 30),
+          Icon(Icons.person, size: 30),
+        ],
+        color: Colors.yellow,
+        buttonBackgroundColor: Colors.yellow,
+        backgroundColor: Colors.white,
+        animationCurve: Curves.ease,
+        animationDuration: Duration(milliseconds: 400),
         onTap: (index) {
-          // Handle navigation based on the tapped index
-          switch (index) {
-            case 1:
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => MyOrders()));
-
-              break;
-            case 3:
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const Profile()));
-            case 2:
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const CheckCart()));
-
-              break;
-            default:
-              // Do nothing
-              break;
+          if(index == 1){
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => MyOrders()));
+          }
+          else if(index == 2){
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => ContactScreen()));
+          }
+          else if(index == 3){
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => Profile()));
           }
         },
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: "Tarix"),
-          BottomNavigationBarItem(icon: Icon(Icons.call), label: "Bog'lanish"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.person), label: "Profil"),
-        ],
+        letIndexChange: (index) => true,
       ),
+
+
+      // bottomNavigationBar: BottomNavigationBar(
+      //   showUnselectedLabels: true,
+      //   iconSize: 25,
+      //   selectedItemColor: AppColors.black,
+      //   selectedFontSize: 18,
+      //   currentIndex: 0,
+      //   unselectedItemColor: Colors.grey,
+      //   onTap: (index) {
+      //     // Handle navigation based on the tapped index
+      //     switch (index) {
+      //       case 1:
+      //         Navigator.push(context,
+      //             MaterialPageRoute(builder: (context) => MyOrders()));
+      //
+      //         break;
+      //       case 3:
+      //         Navigator.push(context,
+      //             MaterialPageRoute(builder: (context) => const Profile()));
+      //       case 2:
+      //         Navigator.push(context,
+      //             MaterialPageRoute(builder: (context) => const CheckCart()));
+      //
+      //         break;
+      //       default:
+      //         // Do nothing
+      //         break;
+      //     }
+      //   },
+      //   items: [
+      //     BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+      //     BottomNavigationBarItem(icon: Icon(Icons.history), label: "Tarix"),
+      //     BottomNavigationBarItem(icon: Icon(Icons.call), label: "Bog'lanish"),
+      //     BottomNavigationBarItem(
+      //         icon: Icon(Icons.person), label: "Profil"),
+      //   ],
+      // ),
     );
   }
 }

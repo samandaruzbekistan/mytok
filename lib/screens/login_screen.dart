@@ -194,8 +194,7 @@ class _LoginPageState extends State<LoginPage> {
                     box.put('name', valueMap['data']['username']);
                     box.put('phone', valueMap['data']['phonenumber']);
                     box.put('password', '${passwordController.text}');
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => HomePage()));
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
                     setState(() {
                       _isLoading = false;
                     });
