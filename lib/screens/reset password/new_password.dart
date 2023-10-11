@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:mytok/screens/home_screen.dart';
+import 'package:mytok/screens/login_screen.dart';
 import 'package:mytok/utils/colors.dart';
 import 'package:http/http.dart' as http;
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -23,7 +24,7 @@ class _NewPasswordState extends State<NewPassword> {
   late Size mediaSize;
   TextEditingController emailController = TextEditingController();
 
-
+  var box = Hive.box('users');
   bool _isLoading = false;
 
   @override
@@ -118,7 +119,7 @@ class _NewPasswordState extends State<NewPassword> {
       {isPassword = false}) {
     return TextField(
       controller: controller,
-      keyboardType: TextInputType.number,
+      // keyboardType: TextInputType.number,
       decoration: InputDecoration(
         suffixIcon: isPassword
             ? Icon(Icons.remove_red_eye)
@@ -138,30 +139,33 @@ class _NewPasswordState extends State<NewPassword> {
           var request = http.MultipartRequest(
               'POST', Uri.parse('https://metest.uz/API/updatepassword.php'));
           request.fields.addAll({
-            'phonenumber': '${name}',
-            'phonenumber': '${phone}',
-            'fmctoken': '${fcmToken}',
-            'password': '${password}'
+            'phonenumber': '${box.get("temp_phone")}',
+            'password': '${emailController.text}'
           });
           http.StreamedResponse response = await request.send();
           if (response.statusCode == 200) {
             var res = await response.stream.bytesToString();
-            print(res);
             Map valueMap = json.decode(res);
-            if (valueMap['success'] == true) {
-              box.put('name', name);
-              box.put('phone', phone);
-              box.put('password', password);
-              box.put('id', valueMap['user_id']);
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => HomePage()));
+            if(valueMap['message'] == "Yangilanish muvaffaqiyatli"){
+              _passwordUpdated(context);
             }
-          } else {}
+            else{
+              setState(() {
+                _isLoading = false;
+              });
+              _apiError(context);
+            }
+          } else {
+            setState(() {
+              _isLoading = false;
+            });
+            _apiError(context);
+          }
         } else {
           setState(() {
             _isLoading = false;
           });
-          _loginError(context);
+          _passwordError(context);
         }
       },
       style: ElevatedButton.styleFrom(
@@ -175,7 +179,7 @@ class _NewPasswordState extends State<NewPassword> {
         color: Colors.white,
       )
           : const Text(
-        "TASDIQLASH",
+        "YANGILASH",
         style: TextStyle(color: AppColors.white),
       ),
     );
@@ -201,12 +205,54 @@ class _NewPasswordState extends State<NewPassword> {
   }
 }
 
-_loginError(context) {
+_passwordError(context) {
   Alert(
     context: context,
     type: AlertType.error,
     title: "Xatolik!",
-    desc: "Tasdiqlash kodi xato",
+    desc: "Parol kamida 8 ta belgi bo'lsin",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
+}
+
+
+_passwordUpdated(context) {
+  Alert(
+    context: context,
+    type: AlertType.success,
+    title: "Xabar!",
+    desc: "Parolingiz yangilandi",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => LoginPage())),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
+}
+
+
+_apiError(context) {
+  Alert(
+    context: context,
+    type: AlertType.error,
+    title: "Xatolik!",
+    desc: "API da nosozlik",
     buttons: [
       DialogButton(
         child: Text(

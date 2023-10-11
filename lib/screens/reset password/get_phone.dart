@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:mytok/screens/reset%20password/reset_passsword_sms.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:http/http.dart' as http;
@@ -17,7 +18,7 @@ class GetPhone extends StatefulWidget {
 class _GetPhoneState extends State<GetPhone> {
   late Color myColor;
   late Size mediaSize;
-
+  var box = Hive.box('users');
   TextEditingController phoneController = TextEditingController();
   // TextEditingController passwordController = TextEditingController();
   final random = Random();
@@ -134,6 +135,7 @@ class _GetPhoneState extends State<GetPhone> {
         if ((phoneController.text.length == 12) &&
             (phoneController.text.startsWith("998"))){
           if (connectivityResult != ConnectivityResult.none) {
+            box.put("temp_phone", phoneController.text);
             var request = http.MultipartRequest('POST', Uri.parse('https://metest.uz/API/checkphonenumber.php'));
             request.fields.addAll({
               'phonenumber': '${phoneController.text}'

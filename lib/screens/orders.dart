@@ -14,6 +14,40 @@ class MyOrders extends StatefulWidget {
 
 class _MyOrdersState extends State<MyOrders> {
   GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
+  List<Map<String, dynamic>> data = [
+    {
+      "id": 15,
+      "type": "0",
+      "category": "Montaj",
+      "fullname": "samandar",
+      "phonenumber": "998975672009",
+      "location": "manzil bu",
+      "titile": "Test",
+      "body": "test buyurtma",
+      "userid": "14",
+      "order_status": "0",
+      "jobid": "1",
+      "datatime": "2023-10-11 00:15:52"
+    },
+    // Add other objects here...
+  ];
+
+  ListView buildListView() {
+    return ListView.builder(
+      itemCount: data.length,
+      itemBuilder: (context, index) {
+        final item = data[index];
+        return ListTile(
+          title: Text(item["titile"]), // Display the 'titile' field
+          subtitle: Text(item["body"]), // Display the 'body' field
+          // You can customize how the data is displayed further
+          // by adding more Text widgets or other widgets here.
+        );
+      },
+    );
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +55,7 @@ class _MyOrdersState extends State<MyOrders> {
     return Scaffold(
       appBar: AppBar(title: Text("Buyurtmalarim"), backgroundColor: AppColors.yellow,),
       body: SingleChildScrollView(
-        child: Container(
-          child: Text("adsfasd"),
-        ),
+        child: buildListView(),
       ),
       bottomNavigationBar: CurvedNavigationBar(
         key: _bottomNavigationKey,
