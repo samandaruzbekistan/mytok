@@ -43,6 +43,7 @@ dependencies:
   curved_navigation_bar: ^1.0.1
   contactus: ^1.2.3
   url_launcher: ^6.0.3
+  flutter_launcher_icons: ^0.13.1
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -58,6 +59,11 @@ dev_dependencies:
   build_runner:
   hive_generator:
 
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logo.jpg"
+  min_sdk_android: 16 # android min sdk min:16, default 21
 
 
 

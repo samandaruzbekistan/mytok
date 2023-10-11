@@ -172,56 +172,61 @@ class _RegPageState extends State<RegPage> {
         final connectivityResult = await (Connectivity().checkConnectivity());
         if ((phoneController.text.length == 12) &&
             (phoneController.text.startsWith("998"))) {
-          if (connectivityResult != ConnectivityResult.none) {
-            var request = http.MultipartRequest('POST',
-                Uri.parse('https://metest.uz/API/checkphonenumber.php'));
-            request.fields.addAll({'phonenumber': '${phoneController.text}'});
-            setState(() {
-              _isLoading = true;
-            });
-            http.StreamedResponse response = await request.send();
-            if (response.statusCode == 200) {
-              var res = await response.stream.bytesToString();
-              Map valueMap = json.decode(res);
-              if (valueMap['registered'] == false) {
-                box.put('temp_name', nameController.text);
-                box.put('temp_phone', phoneController.text);
-                box.put('temp_password', passwordController.text);
-                final sixDigitNumber = random.nextInt(900000) + 100000;
-                var request2 = http.MultipartRequest('POST',
-                    Uri.parse('https://markaz.ideal-study.uz/api/sendSms'));
-                request2.fields.addAll({
-                  'phone': '${phoneController.text}',
-                  'code': '${sixDigitNumber}'
-                });
-                http.StreamedResponse response2 = await request2.send();
-                if (response2.statusCode == 200) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SmsCode(code: '${sixDigitNumber}'),
-                    ),
-                  );
-                } else {
+          if(passwordController.text.length > 7){
+            if (connectivityResult != ConnectivityResult.none) {
+              var request = http.MultipartRequest('POST',
+                  Uri.parse('https://metest.uz/API/checkphonenumber.php'));
+              request.fields.addAll({'phonenumber': '${phoneController.text}'});
+              setState(() {
+                _isLoading = true;
+              });
+              http.StreamedResponse response = await request.send();
+              if (response.statusCode == 200) {
+                var res = await response.stream.bytesToString();
+                Map valueMap = json.decode(res);
+                if (valueMap['registered'] == false) {
+                  box.put('temp_name', nameController.text);
+                  box.put('temp_phone', phoneController.text);
+                  box.put('temp_password', passwordController.text);
+                  final sixDigitNumber = random.nextInt(900000) + 100000;
+                  var request2 = http.MultipartRequest('POST',
+                      Uri.parse('https://markaz.ideal-study.uz/api/sendSms'));
+                  request2.fields.addAll({
+                    'phone': '${phoneController.text}',
+                    'code': '${sixDigitNumber}'
+                  });
+                  http.StreamedResponse response2 = await request2.send();
+                  if (response2.statusCode == 200) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SmsCode(code: '${sixDigitNumber}'),
+                      ),
+                    );
+                  } else {
+                    setState(() {
+                      _isLoading = false;
+                    });
+                    _apiError(context);
+                  }
+                } else if (valueMap['registered'] == true) {
                   setState(() {
                     _isLoading = false;
                   });
-                  _apiError(context);
+                  _loginError(context);
                 }
-              } else if (valueMap['registered'] == true) {
+              } else {
                 setState(() {
                   _isLoading = false;
                 });
-                _loginError(context);
+                _apiError(context);
               }
             } else {
-              setState(() {
-                _isLoading = false;
-              });
-              _apiError(context);
+              _internetError(context);
             }
-          } else {
-            _internetError(context);
+          }
+          else{
+            _passwordError(context);
           }
         } else {
           _onBasicAlertPressedValidate(context);
@@ -269,7 +274,7 @@ _onBasicAlertPressedValidate(context) {
     context: context,
     type: AlertType.info,
     title: "Xatolik!",
-    desc: "Telefon raqamni quidagicha kiriting:\n998 XX XXX XX XX",
+    desc: "Telefon raqamni quidagicha kiriting:\n998XXXXXXXXX",
     buttons: [
       DialogButton(
         child: Text(
@@ -330,6 +335,26 @@ _loginError(context) {
     type: AlertType.warning,
     title: "Xatolik!",
     desc: "Raqam ro'yhatdan o'tgan",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
+}
+
+_passwordError(context) {
+  Alert(
+    context: context,
+    type: AlertType.warning,
+    title: "Xatolik!",
+    desc: "Parol kamida 8 ta belgi bo'lishi kerak",
     buttons: [
       DialogButton(
         child: Text(

@@ -6,7 +6,7 @@ import 'package:mytok/firebase_api.dart';
 import 'package:mytok/screens/home_screen.dart';
 import 'package:mytok/screens/register_screen.dart';
 import 'package:mytok/screens/welcome_screen.dart';
-
+import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter is initialized.
@@ -14,6 +14,10 @@ void main() async {
   await Hive.openBox('users');
   await Firebase.initializeApp();
   await FirebaseApi().initNotification();
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+
   runApp(MyApp());
 }
 

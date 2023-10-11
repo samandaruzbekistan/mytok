@@ -24,7 +24,7 @@ showAlert(BuildContext context) {
             mainAxisSize: MainAxisSize.min,
             children: [
               InkWell(
-                onTap: () => launchUrl(Uri.parse('tel:' + "+998975672009"!)),
+                onTap: () => launchUrl(Uri.parse('tel:' + "+998956769338"!)),
                 child: Container(
                   height: 50.0,
                   alignment: Alignment.center,
@@ -33,7 +33,7 @@ showAlert(BuildContext context) {
               ),
               Divider(),
               InkWell(
-                onTap: () => launchUrl(Uri.parse('sms:' + "+998975672009"!)),
+                onTap: () => launchUrl(Uri.parse('sms:' + "+998956769338"!)),
                 child: Container(
                   alignment: Alignment.center,
                   height: 50.0,
@@ -43,13 +43,7 @@ showAlert(BuildContext context) {
               Divider(),
               InkWell(
                 onTap: () {
-                  final url = Uri.parse(
-                    'https://t.me/' +
-                        "998975672009"!.substring(
-                          1,
-                          "998975672009"!.length,
-                        ),
-                  );
+                  final url = Uri.parse('https://t.me/xasantoga');
                   launchUrl(url, mode: LaunchMode.externalApplication);
                 },
                 child: Container(
@@ -87,8 +81,8 @@ class _ContactScreenState extends State<ContactScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              SizedBox(height: h*0.1,),
-              Image.asset("assets/images/logo.png", width: w*0.5,),
+              SizedBox(height: h*0.05,),
+              Image.asset("assets/images/logo.png", width: w*0.4,),
               SizedBox(height: h*0.05,),
               Visibility(
                 visible: "https://mytok.uz" != null,
@@ -116,7 +110,7 @@ class _ContactScreenState extends State<ContactScreen> {
                 ),
               ),
               Visibility(
-                visible: "+998975672009" != null,
+                visible: "+998956769338" != null,
                 child: Card(
                   clipBehavior: Clip.antiAlias,
                   margin: EdgeInsets.symmetric(
@@ -137,6 +131,56 @@ class _ContactScreenState extends State<ContactScreen> {
                       ),
                     ),
                     onTap: () => showAlert(context),
+                  ),
+                ),
+              ),
+              Visibility(
+                visible: "https://t.me/" != null,
+                child: Card(
+                  clipBehavior: Clip.antiAlias,
+                  margin: EdgeInsets.symmetric(
+                    vertical: 10.0,
+                    horizontal: 25.0,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50.0),
+                  ),
+                  color: Colors.white,
+                  child: ListTile(
+                    leading: Icon(Icons.telegram_outlined),
+                    title: Text(
+                      "Telegram" ?? 'Website',
+                      style: TextStyle(
+                        color: Colors.teal.shade900,
+                        fontFamily: "Sail",
+                      ),
+                    ),
+                    onTap: () => launchUrl(Uri.parse("https://t.me/xasantoga"!)),
+                  ),
+                ),
+              ),
+              Visibility(
+                visible: "https://t.me/" != null,
+                child: Card(
+                  clipBehavior: Clip.antiAlias,
+                  margin: EdgeInsets.symmetric(
+                    vertical: 10.0,
+                    horizontal: 25.0,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50.0),
+                  ),
+                  color: Colors.white,
+                  child: ListTile(
+                    leading: Icon(Icons.telegram_outlined),
+                    title: Text(
+                      "Telegram kanal" ?? 'Website',
+                      style: TextStyle(
+                        color: Colors.teal.shade900,
+                        fontFamily: "Sail",
+                      ),
+                    ),
+                    onTap: () => launchUrl(Uri.parse("https://t.me/mytokuz"!)),
                   ),
                 ),
               ),

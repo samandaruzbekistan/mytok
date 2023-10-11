@@ -273,9 +273,9 @@ class _ElectrCategoriesState extends State<ElectrCategories> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => Order(
-                        job_title: "Simyogoch",
+                        job_title: "Simyog'och",
                         avatar: "assets/images/simyogoch.png",
-                        description: "Simyogoch ishlari"),
+                        description: "Simyog'och ishlari"),
                   ),
                 );
               },
@@ -303,7 +303,7 @@ class _ElectrCategoriesState extends State<ElectrCategories> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Simyogoch",
+                            "Simyog'och",
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 25.0,
@@ -313,7 +313,7 @@ class _ElectrCategoriesState extends State<ElectrCategories> {
                           //   height: 3.0,
                           // ),
                           Text(
-                            "Simyogoch ishlari",
+                            "Simyog'och ishlari",
                             style: TextStyle(fontSize: 15.0),
                           ),
                         ],

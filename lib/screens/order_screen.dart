@@ -129,42 +129,46 @@ class _OrderState extends State<Order> {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  if (phoneController.text.startsWith("998") &&
-                      titleController.text.length > 0 &&
+                  if (titleController.text.length > 0 &&
                       descriptionController.text.length > 0 &&
                       addressController.text.length > 0) {
-                    final connectivityResult =
-                        await (Connectivity().checkConnectivity());
-                    if (connectivityResult != ConnectivityResult.none) {
-                      var request = http.MultipartRequest('POST', Uri.parse('https://metest.uz/API/saveorder.php'));
-                      request.fields.addAll({
-                        'type': '0',
-                        'category': '${widget.job_title}',
-                        'fullname': '${box.get('name')}',
-                        'phonenumber': '${phoneController.text}',
-                        'location': '${addressController.text}',
-                        'title': '${titleController.text}',
-                        'body': '${descriptionController.text}',
-                        'userid': '${box.get('id')}',
-                        'jobid': '0'
-                      });
-                      setState(() {
-                        _isLoading = true;
-                      });
-                      http.StreamedResponse response = await request.send();
-                      if (response.statusCode == 200){
-                        var res = await response.stream.bytesToString();
-                        Map valueMap = json.decode(res);
-                        if (valueMap['success'] == true) {
-                          setState(() {
-                            _isLoading = false;
-                          });
-                          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => CheckCart()));
+                    if(phoneController.text.startsWith("998")){
+                      final connectivityResult =
+                      await (Connectivity().checkConnectivity());
+                      if (connectivityResult != ConnectivityResult.none) {
+                        var request = http.MultipartRequest('POST', Uri.parse('https://metest.uz/API/saveorder.php'));
+                        request.fields.addAll({
+                          'type': '0',
+                          'category': '${widget.job_title}',
+                          'fullname': '${box.get('name')}',
+                          'phonenumber': '${phoneController.text}',
+                          'location': '${addressController.text}',
+                          'title': '${titleController.text}',
+                          'body': '${descriptionController.text}',
+                          'userid': '${box.get('id')}',
+                          'jobid': '0'
+                        });
+                        setState(() {
+                          _isLoading = true;
+                        });
+                        http.StreamedResponse response = await request.send();
+                        if (response.statusCode == 200){
+                          var res = await response.stream.bytesToString();
+                          Map valueMap = json.decode(res);
+                          if (valueMap['success'] == true) {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => CheckCart()));
+                          }
                         }
                       }
+                      else {
+                        _internetError(context);
+                      }
                     }
-                    else {
-                      _internetError(context);
+                    else{
+                      _phoneError(context);
                     }
                   } else {
                     _formError(context);
@@ -237,12 +241,12 @@ _internetError(context) {
   ).show();
 }
 
-_success(context) {
+_phoneError(context) {
   Alert(
     context: context,
-    type: AlertType.success,
-    title: "Xabar!",
-    desc: "Buyurtma yuborildi",
+    type: AlertType.warning,
+    title: "Xatolik!",
+    desc: "Telefon raqamni quidagicha kiriting:\n998XXXXXXXXX",
     buttons: [
       DialogButton(
         child: Text(
