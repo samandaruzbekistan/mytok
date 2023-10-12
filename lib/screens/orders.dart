@@ -27,7 +27,7 @@ class _MyOrdersState extends State<MyOrders> {
 
   Future<void> fetchData() async {
     var request = http.MultipartRequest(
-        'POST', Uri.parse('https://metest.uz/API/alluseridorder.php'));
+        'POST', Uri.parse('https://mytok.uz/API/alluseridorder.php'));
     request.fields.addAll({'userid': '${box.get('id')}'});
     final connectivityResult = await (Connectivity().checkConnectivity());
     if(connectivityResult != ConnectivityResult.none){

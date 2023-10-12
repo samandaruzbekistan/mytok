@@ -137,7 +137,7 @@ class _NewPasswordState extends State<NewPassword> {
             _isLoading = true;
           });
           var request = http.MultipartRequest(
-              'POST', Uri.parse('https://metest.uz/API/updatepassword.php'));
+              'POST', Uri.parse('https://mytok.uz/API/updatepassword.php'));
           request.fields.addAll({
             'phonenumber': '${box.get("temp_phone")}',
             'password': '${emailController.text}'

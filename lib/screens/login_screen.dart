@@ -169,7 +169,7 @@ class _LoginPageState extends State<LoginPage> {
           } else {
             if (connectivityResult != ConnectivityResult.none) {
               var request = http.MultipartRequest(
-                  'POST', Uri.parse('https://metest.uz/API/loginAPI.php'));
+                  'POST', Uri.parse('https://mytok.uz/API/loginAPI.php'));
               request.fields.addAll({
                 'phonenumber': '${emailController.text}',
                 'password': '${passwordController.text}'
@@ -188,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                   });
                 } else if (valueMap['success'] == true) {
                   var request2 = http.MultipartRequest(
-                      'POST', Uri.parse('https://metest.uz/API/fmctokenupdate.php'));
+                      'POST', Uri.parse('https://mytok.uz/API/fmctokenupdate.php'));
                   request2.fields.addAll({
                     'id': "${valueMap['data']['id']}",
                     'fmctoken': '${fcmToken}'

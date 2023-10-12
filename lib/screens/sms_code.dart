@@ -142,7 +142,7 @@ class _SmsCodeState extends State<SmsCode> {
           var phone = box.get('temp_phone');
           var password = box.get('temp_password');
           var request = http.MultipartRequest(
-              'POST', Uri.parse('https://metest.uz/API/'));
+              'POST', Uri.parse('https://mytok.uz/API/'));
           request.fields.addAll({
             'username': '${name}',
             'phonenumber': '${phone}',

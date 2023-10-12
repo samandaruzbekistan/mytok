@@ -102,7 +102,7 @@ class _ProfileState extends State<Profile> {
                         var request = http.MultipartRequest(
                             'POST',
                             Uri.parse(
-                                'https://metest.uz/API/updateuserdata.php'));
+                                'https://mytok.uz/API/updateuserdata.php'));
                         request.fields.addAll({
                           'phonenumber': '${phoneController.text}',
                           'username': '${nameController.text}',

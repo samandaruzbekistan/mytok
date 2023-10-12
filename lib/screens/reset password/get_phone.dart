@@ -136,7 +136,7 @@ class _GetPhoneState extends State<GetPhone> {
             (phoneController.text.startsWith("998"))){
           if (connectivityResult != ConnectivityResult.none) {
             box.put("temp_phone", phoneController.text);
-            var request = http.MultipartRequest('POST', Uri.parse('https://metest.uz/API/checkphonenumber.php'));
+            var request = http.MultipartRequest('POST', Uri.parse('https://mytok.uz/API/checkphonenumber.php'));
             request.fields.addAll({
               'phonenumber': '${phoneController.text}'
             });

@@ -175,7 +175,7 @@ class _RegPageState extends State<RegPage> {
           if(passwordController.text.length > 7){
             if (connectivityResult != ConnectivityResult.none) {
               var request = http.MultipartRequest('POST',
-                  Uri.parse('https://metest.uz/API/checkphonenumber.php'));
+                  Uri.parse('https://mytok.uz/API/checkphonenumber.php'));
               request.fields.addAll({'phonenumber': '${phoneController.text}'});
               setState(() {
                 _isLoading = true;

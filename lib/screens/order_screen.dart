@@ -136,7 +136,7 @@ class _OrderState extends State<Order> {
                       final connectivityResult =
                       await (Connectivity().checkConnectivity());
                       if (connectivityResult != ConnectivityResult.none) {
-                        var request = http.MultipartRequest('POST', Uri.parse('https://metest.uz/API/saveorder.php'));
+                        var request = http.MultipartRequest('POST', Uri.parse('https://mytok.uz/API/saveorder.php'));
                         request.fields.addAll({
                           'type': '0',
                           'category': '${widget.job_title}',
