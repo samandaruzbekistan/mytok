@@ -8,6 +8,8 @@ import 'package:mytok/screens/home_screen.dart';
 import 'package:mytok/screens/profile.dart';
 import 'package:mytok/utils/colors.dart';
 import 'package:http/http.dart' as http;
+import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'contact.dart';
 
 class MyOrders extends StatefulWidget {
@@ -30,13 +32,14 @@ class _MyOrdersState extends State<MyOrders> {
         'POST', Uri.parse('https://mytok.uz/API/alluseridorder.php'));
     request.fields.addAll({'userid': '${box.get('id')}'});
     final connectivityResult = await (Connectivity().checkConnectivity());
-    if(connectivityResult != ConnectivityResult.none){
+    if (connectivityResult != ConnectivityResult.none) {
       http.StreamedResponse response = await request.send();
       if (response.statusCode == 200) {
         var res = await response.stream.bytesToString();
         if (res == "Taqdim etilgan ID uchun hech qanday ma'lumot topilmadi") {
           status = 2;
         } else {
+
           final data = json.decode(res);
           setState(() {
             status = 1;
@@ -48,8 +51,7 @@ class _MyOrdersState extends State<MyOrders> {
           status = -1;
         });
       }
-    }
-    else{
+    } else {
       setState(() {
         status = -2;
       });
@@ -110,11 +112,28 @@ class _MyOrdersState extends State<MyOrders> {
               itemCount: data.length,
               itemBuilder: (context, index) {
                 final item = data[index];
-                return ListTile(
-                  title: Text(item['category'] ?? ''),
-                  subtitle: Text(item['titile'] ?? ''),
-                  leading: _buildLeadingIcon(item['category']),
-                  trailing: _buildIcon(item['order_status'])
+                return GestureDetector(
+                  onTap: () async {
+                    if (item['order_status'] == "0") {
+                      _findWorker(context);
+                    } else if (item['order_status'] == "1") {
+                      var request = http.MultipartRequest('POST',
+                          Uri.parse('https://mytok.uz/API/getorderuser.php'));
+                      request.fields.addAll({'workid': '${item['id']}'});
+                      http.StreamedResponse response = await request.send();
+                      var res2 = await response.stream.bytesToString();
+                      Map valueMap2 = json.decode(res2);
+                      if (response.statusCode == 200) {
+                        _okWorker(context, "${valueMap2['username']}",
+                            "${valueMap2['phone_number']}");
+                      }
+                    }
+                  },
+                  child: ListTile(
+                      title: Text(item['category'] ?? ''),
+                      subtitle: Text(item['titile'] ?? ''),
+                      leading: _buildLeadingIcon(item['category']),
+                      trailing: _buildIcon(item['order_status'])),
                 );
               },
             );
@@ -162,31 +181,90 @@ class _MyOrdersState extends State<MyOrders> {
       return CircleAvatar(
         child: Image.asset("assets/images/shit.png"),
       );
-    }else if (category == "Vklyuchatel") {
+    } else if (category == "Vklyuchatel") {
       return CircleAvatar(
         child: Image.asset("assets/images/vklyuchatel.png"),
       );
-    }else if (category == "Simyog'och") {
+    } else if (category == "Simyog'och") {
       return CircleAvatar(
         child: Image.asset("assets/images/simyogoch.png"),
       );
-    }else if (category == "Qandil o'rnatish") {
+    } else if (category == "Qandil o'rnatish") {
       return CircleAvatar(
         child: Image.asset("assets/images/qandil.png"),
       );
-    }else {
+    } else {
       return CircleAvatar(
         child: Image.asset("assets/images/simyogoch.png"),
       );
     }
   }
 
-
   Widget _buildIcon(String category) {
     if (category == "0") {
-      return Container(width: 20, height: 20,child: CircularProgressIndicator(color: Colors.black,));
+      return Container(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(
+            color: Colors.black,
+          ));
     } else {
-      return Icon(Icons.check);
+      return CircleAvatar(
+        backgroundColor: AppColors.yellow,
+        child: Icon(Icons.check),
+      );
     }
   }
+}
+
+_findWorker(context) {
+  Alert(
+    context: context,
+    type: AlertType.warning,
+    title: "Ish holati!",
+    desc: "Hodim izlanmoqda",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
+}
+
+_okWorker(context, String worker, String worker_phone) {
+  Alert(
+    context: context,
+    type: AlertType.success,
+    title: "Hodim",
+    desc: "Ismi: ${worker}\nTel: ${worker_phone}",
+    buttons: [
+      DialogButton(
+        child: GestureDetector(
+          onTap: () => launchUrl(Uri.parse('tel:' + "+${worker_phone}")),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.phone,
+                color: Colors.white,
+              ),
+              Text(
+                " Qo'ng'iroq qilish",
+                style: TextStyle(color: Colors.white, fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
 }
