@@ -141,13 +141,17 @@ class _SmsCodeState extends State<SmsCode> {
           var name = box.get('temp_name');
           var phone = box.get('temp_phone');
           var password = box.get('temp_password');
+          var region_id = box.get('temp_region_id');
+          var region_name = box.get('temp_region_name');
           var request = http.MultipartRequest(
               'POST', Uri.parse('https://mytok.uz/API/'));
           request.fields.addAll({
             'username': '${name}',
             'phonenumber': '${phone}',
             'fmctoken': '${fcmToken}',
-            'password': '${password}'
+            'password': '${password}',
+            'region_id': '${region_id}',
+            'region_name': '${region_name}',
           });
           http.StreamedResponse response = await request.send();
           if (response.statusCode == 200) {
@@ -158,6 +162,8 @@ class _SmsCodeState extends State<SmsCode> {
               box.put('name', name);
               box.put('phone', phone);
               box.put('password', password);
+              box.put('region_id', region_id);
+              box.put('region_name', region_name);
               box.put('id', valueMap['user_id']);
               Navigator.push(
                   context, MaterialPageRoute(builder: (context) => HomePage()));

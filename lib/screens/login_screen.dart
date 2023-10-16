@@ -26,6 +26,14 @@ class _LoginPageState extends State<LoginPage> {
   bool rememberUser = false;
   var box = Hive.box('users');
   bool _isLoading = false;
+  bool isObscure = true;
+
+
+  void _toggle() {
+    setState(() {
+      isObscure = !isObscure;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +109,7 @@ class _LoginPageState extends State<LoginPage> {
         _buildInputField(emailController),
         const SizedBox(height: 40),
         _buildGreyText("Parol"),
-        _buildPasswordInputField(passwordController, isPassword: true),
+        _buildPasswordInputField(passwordController, isObscure),
         const SizedBox(height: 20),
         _buildRememberForgot(),
         const SizedBox(height: 20),
@@ -129,14 +137,23 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildPasswordInputField(TextEditingController controller,
-      {isPassword = false}) {
+  Widget _buildPasswordInputField(TextEditingController controller, isObscure) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
-        suffixIcon: isPassword ? Icon(Icons.remove_red_eye) : Icon(Icons.done),
+        suffixIcon: IconButton(
+          icon: Icon(
+            isObscure ? Icons.remove_red_eye : Icons.visibility_off,
+            color: Colors.grey,
+          ),
+          onPressed: () {
+            setState(() {
+              _toggle();
+            });
+          },
+        ),
       ),
-      obscureText: isPassword,
+      obscureText: isObscure,
     );
   }
 
@@ -200,6 +217,8 @@ class _LoginPageState extends State<LoginPage> {
                     box.put('id', valueMap['data']['id']);
                     box.put('name', valueMap['data']['username']);
                     box.put('phone', valueMap['data']['phonenumber']);
+                    box.put('region_name', valueMap['data']['region_name']);
+                    box.put('region_id', valueMap['data']['region']);
                     box.put('password', '${passwordController.text}');
                     Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
                     setState(() {

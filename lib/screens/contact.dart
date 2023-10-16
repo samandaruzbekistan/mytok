@@ -155,7 +155,7 @@ class _ContactScreenState extends State<ContactScreen> {
                         fontFamily: "Sail",
                       ),
                     ),
-                    onTap: () => launchUrl(Uri.parse("https://t.me/xasantoga"!)),
+                    onTap: () => launchUrl(Uri.parse("https://t.me/mytoksupportbot"!)),
                   ),
                 ),
               ),

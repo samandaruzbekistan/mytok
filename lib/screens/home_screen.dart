@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:mytok/screens/contact.dart';
 import 'package:mytok/screens/electr_categories.dart';
 import 'package:mytok/screens/orders.dart';
 import 'package:mytok/screens/profile.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:mytok/utils/colors.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -15,10 +17,12 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
+  var box = Hive.box('users');
 
   @override
   Widget build(BuildContext context) {
     var h = MediaQuery.of(context).size.height;
+    var region_name = box.get('region_name');
     return Scaffold(
       body: ListView(
         children: [
@@ -48,7 +52,7 @@ class _HomePageState extends State<HomePage> {
                     Row(
                       children: [
                         Icon(Icons.location_on_outlined, size: 18),
-                        Text("Sirdaryo", style: TextStyle(fontSize: 18),)
+                        Text('${region_name}', style: TextStyle(fontSize: 18),)
                       ],
                     ),
                     Icon(
@@ -120,7 +124,9 @@ class _HomePageState extends State<HomePage> {
                   height: 10,
                 ),
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    _alert(context);
+                  },
                   child: Container(
                     width: (MediaQuery.of(context).size.width),
                     padding:
@@ -217,3 +223,25 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
+
+_alert(context) {
+  Alert(
+    context: context,
+    type: AlertType.success,
+    title: "Xabar!",
+    desc: "Bo'lim tez kunda ishga tushadi",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
+}
+

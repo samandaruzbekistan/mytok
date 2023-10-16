@@ -1,5 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:mytok/screens/montaj.dart';
 import 'package:mytok/screens/order_screen.dart';
 import 'package:mytok/screens/profile.dart';
 import 'package:mytok/utils/colors.dart';
@@ -37,10 +38,7 @@ class _ElectrCategoriesState extends State<ElectrCategories> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const Order(
-                        job_title: "Montaj",
-                        avatar: "assets/images/montaj.png",
-                        description: "3 xil turdagi montaj ishlari"),
+                    builder: (context) => Montaj(),
                   ),
                 );
               },

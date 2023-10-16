@@ -195,7 +195,7 @@ class _MyOrdersState extends State<MyOrders> {
       );
     } else {
       return CircleAvatar(
-        child: Image.asset("assets/images/simyogoch.png"),
+        child: Image.asset("assets/images/montaj.png"),
       );
     }
   }

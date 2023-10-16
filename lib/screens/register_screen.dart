@@ -20,12 +20,50 @@ class _RegPageState extends State<RegPage> {
   late Color myColor;
   var box = Hive.box('users');
   late Size mediaSize;
+  String? selectedValue = null;
+  String? selectedRegionName = null;
   TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
-  bool rememberUser = false;
   final random = Random();
   bool _isLoading = false;
+  bool isObscure = true;
+  List<Map<String, dynamic>> regions = [];
+  List<DropdownMenuItem<String>> dropdownItems = [];
+
+
+  void _toggle() {
+    setState(() {
+      isObscure = !isObscure;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDataFromApi();
+  }
+
+  void fetchDataFromApi() {
+    http.post(Uri.parse('https://mytok.uz/flutterapi/getregion.php')).then((response) {
+      if (response.statusCode == 200) {
+        final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(json.decode(response.body));
+        setState(() {
+          regions = data;
+          dropdownItems = data.map((item) {
+            return DropdownMenuItem<String>(
+              child: Text(item['region']),
+              value: item['id'].toString(),
+            );
+          }).toList();
+        });
+      } else {
+        _internetError(context);
+      }
+    }).catchError((error) {
+      _internetError(context);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +122,12 @@ class _RegPageState extends State<RegPage> {
     );
   }
 
+  Map<String, dynamic> findRegionById(String id) {
+    Map<String, dynamic> region = regions.firstWhere((region) => region['id'] == id, orElse: () => Map<String, dynamic>.from({}));
+    return region;
+  }
+
+
   Widget _buildForm() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,7 +140,7 @@ class _RegPageState extends State<RegPage> {
               fontWeight: FontWeight.w500),
         ),
         // _buildGreyText("MyTok tezkor va sifatli xizmat"),
-        const SizedBox(height: 60),
+        const SizedBox(height: 35),
         _buildGreyText("Ism familya"),
         _buildNameInputField(nameController),
         const SizedBox(height: 20),
@@ -104,10 +148,24 @@ class _RegPageState extends State<RegPage> {
         _buildPhoneInputField(phoneController),
         const SizedBox(height: 20),
         _buildGreyText("Parol"),
-        _buildInputField(passwordController, isPassword: true),
+        _buildPasswordInputField(passwordController, isObscure),
+        const SizedBox(height: 20),
+        _buildGreyText("Hudud"),
+        DropdownButtonFormField(
+            validator: (value) => value == null ? "Select a country" : null,
+            // dropdownColor: Colors.blueAccent,
+            value: selectedValue,
+            onChanged: (String? newValue) {
+              setState(() {
+                selectedValue = newValue!;
+                selectedRegionName = dropdownItems
+                    .firstWhere((item) => item.value == newValue)
+                    .child
+                    .toString();
+              });
+            },
+            items: dropdownItems),
         const SizedBox(height: 40),
-        // _buildRememberForgot(),
-        // const SizedBox(height: 20),
         _buildLoginButton(),
       ],
     );
@@ -120,14 +178,23 @@ class _RegPageState extends State<RegPage> {
     );
   }
 
-  Widget _buildInputField(TextEditingController controller,
-      {isPassword = false}) {
+  Widget _buildPasswordInputField(TextEditingController controller, isObscure) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
-        suffixIcon: isPassword ? Icon(Icons.remove_red_eye) : Icon(Icons.phone),
+        suffixIcon: IconButton(
+          icon: Icon(
+            isObscure ? Icons.remove_red_eye : Icons.visibility_off,
+            color: Colors.grey,
+          ),
+          onPressed: () {
+            setState(() {
+              _toggle();
+            });
+          },
+        ),
       ),
-      obscureText: isPassword,
+      obscureText: isObscure,
     );
   }
 
@@ -156,23 +223,14 @@ class _RegPageState extends State<RegPage> {
     );
   }
 
-  Widget _buildRememberForgot() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        TextButton(
-            onPressed: () {}, child: _buildGreyText("Parol esingizda yo'qmi?"))
-      ],
-    );
-  }
-
   Widget _buildLoginButton() {
     return ElevatedButton(
       onPressed: () async {
+        var region_ = findRegionById(selectedValue!);
         final connectivityResult = await (Connectivity().checkConnectivity());
         if ((phoneController.text.length == 12) &&
             (phoneController.text.startsWith("998"))) {
-          if(passwordController.text.length > 7){
+          if (passwordController.text.length > 7) {
             if (connectivityResult != ConnectivityResult.none) {
               var request = http.MultipartRequest('POST',
                   Uri.parse('https://mytok.uz/API/checkphonenumber.php'));
@@ -188,9 +246,11 @@ class _RegPageState extends State<RegPage> {
                   box.put('temp_name', nameController.text);
                   box.put('temp_phone', phoneController.text);
                   box.put('temp_password', passwordController.text);
+                  box.put('temp_region_id', selectedValue);
+                  box.put('temp_region_name', region_['region']);
                   final sixDigitNumber = random.nextInt(900000) + 100000;
                   var request2 = http.MultipartRequest('POST',
-                      Uri.parse('https://markaz.ideal-study.uz/api/sendSms'));
+                      Uri.parse('https://mytok.uz/flutterapi/sendsms.php'));
                   request2.fields.addAll({
                     'phone': '${phoneController.text}',
                     'code': '${sixDigitNumber}'
@@ -200,7 +260,8 @@ class _RegPageState extends State<RegPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => SmsCode(code: '${sixDigitNumber}'),
+                        builder: (context) =>
+                            SmsCode(code: '${sixDigitNumber}'),
                       ),
                     );
                   } else {
@@ -224,8 +285,7 @@ class _RegPageState extends State<RegPage> {
             } else {
               _internetError(context);
             }
-          }
-          else{
+          } else {
             _passwordError(context);
           }
         } else {
@@ -246,25 +306,6 @@ class _RegPageState extends State<RegPage> {
               "Ro'yhatdan o'tish",
               style: TextStyle(color: AppColors.white),
             ),
-    );
-  }
-
-  Widget _buildOtherLogin() {
-    return Center(
-      child: Column(
-        children: [
-          _buildGreyText("Or Login with"),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Tab(icon: Image.asset("assets/images/facebook.png")),
-              Tab(icon: Image.asset("assets/images/twitter.png")),
-              Tab(icon: Image.asset("assets/images/github.png")),
-            ],
-          )
-        ],
-      ),
     );
   }
 }
@@ -368,3 +409,4 @@ _passwordError(context) {
     ],
   ).show();
 }
+
