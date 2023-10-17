@@ -44,9 +44,9 @@ class _MontajState extends State<Montaj> {
     return await Geolocator.getCurrentPosition();
   }
   final List<String> data = [
-    "Montaj",
-    "Yevro montaj",
     "Oddiy montaj",
+    "Pol yevro montaj",
+    "Yevro montaj",
   ];
 
   

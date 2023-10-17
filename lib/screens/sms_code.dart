@@ -165,8 +165,7 @@ class _SmsCodeState extends State<SmsCode> {
               box.put('region_id', region_id);
               box.put('region_name', region_name);
               box.put('id', valueMap['user_id']);
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => HomePage()));
+              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
             }
           } else {}
         } else {

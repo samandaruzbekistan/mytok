@@ -115,9 +115,6 @@ class _OrderState extends State<Order> {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  setState(() {
-                    _isLoading = true;
-                  });
                   final connectivityResult =
                   await (Connectivity().checkConnectivity());
                   if (connectivityResult != ConnectivityResult.none) {
@@ -125,6 +122,7 @@ class _OrderState extends State<Order> {
                     setState(() {
                       lat = '${position.latitude}';
                       long = '${position.longitude}';
+                      _isLoading = true;
                     });
                     var request = http.MultipartRequest('POST', Uri.parse('https://mytok.uz/API/saveorder.php'));
                     request.fields.addAll({

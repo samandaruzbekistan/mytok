@@ -43,7 +43,7 @@ showAlert(BuildContext context) {
               Divider(),
               InkWell(
                 onTap: () {
-                  final url = Uri.parse('https://t.me/xasantoga');
+                  final url = Uri.parse('https://t.me/mytoksupportbot');
                   launchUrl(url, mode: LaunchMode.externalApplication);
                 },
                 child: Container(
