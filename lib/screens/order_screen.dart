@@ -38,17 +38,32 @@ class _OrderState extends State<Order> {
 
   Future<Position> _getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if(!serviceEnabled){
-      return _locationError(context);
+    if (!serviceEnabled) {
+      setState(() {
+        bool _isLoading = false;
+      });
+      await _locationError(context);
+      throw Exception("Location service is not enabled");
     }
+
     LocationPermission permission = await Geolocator.checkPermission();
-    if(permission == LocationPermission.denied){
+    if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      return _locationError(context);
+      setState(() {
+        bool _isLoading = false;
+      });
+      await _locationError(context);
+      throw Exception("Location permission denied");
     }
-    if(permission == LocationPermission.deniedForever){
-      return _locationError(context);
+
+    if (permission == LocationPermission.deniedForever) {
+      setState(() {
+        bool _isLoading = false;
+      });
+      await _locationError(context);
+      throw Exception("Location permission denied forever");
     }
+
     return await Geolocator.getCurrentPosition();
   }
 
@@ -115,6 +130,9 @@ class _OrderState extends State<Order> {
               ),
               ElevatedButton(
                 onPressed: () async {
+                  setState(() {
+                    _isLoading = true;
+                  });
                   final connectivityResult =
                   await (Connectivity().checkConnectivity());
                   if (connectivityResult != ConnectivityResult.none) {
@@ -122,7 +140,6 @@ class _OrderState extends State<Order> {
                     setState(() {
                       lat = '${position.latitude}';
                       long = '${position.longitude}';
-                      _isLoading = true;
                     });
                     var request = http.MultipartRequest('POST', Uri.parse('https://mytok.uz/API/saveorder.php'));
                     request.fields.addAll({
@@ -139,19 +156,25 @@ class _OrderState extends State<Order> {
 
                     http.StreamedResponse response = await request.send();
                     if (response.statusCode == 200){
+                      setState(() {
+                        _isLoading = false;
+                      });
                       var res = await response.stream.bytesToString();
                       Map valueMap = json.decode(res);
                       if (valueMap['success'] == true) {
-                        setState(() {
-                          _isLoading = false;
-                        });
                         Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => CheckCart()));
+                      }
+                      else if(valueMap['status'] == false){
+                        _orderFound(context);
                       }
                     }
                   }
                   else {
                     _internetError(context);
                   }
+                  setState(() {
+                    _isLoading = false;
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   // shape: const StadiumBorder(),
@@ -221,12 +244,32 @@ _internetError(context) {
 }
 
 
-_locationError(context) {
-  Alert(
+Future<void> _locationError(context) async {
+  await Alert(
     context: context,
     type: AlertType.warning,
     title: "Xatolik!",
-    desc: "Joylashuv manzilini olish uchun ilovaga ruhsat bering",
+    desc: "Joylashuvni olish uchun ilovaga ruhsat zarur. Qayta urinib ko'ring",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () => Navigator.pop(context),
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
+}
+
+_orderFound(context) {
+  Alert(
+    context: context,
+    type: AlertType.warning,
+    title: "Ogoxlantirish!",
+    desc: "Sizda buyurtmalar mavjud",
     buttons: [
       DialogButton(
         child: Text(

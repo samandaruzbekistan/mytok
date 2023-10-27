@@ -96,7 +96,7 @@ class _GetPhoneState extends State<GetPhone> {
         // _buildGreyText("MyTok tezkor va sifatli xizmat"),
         const SizedBox(height: 60),
         _buildGreyText("Telefon raqamingiz"),
-        _buildNameInputField(phoneController),
+        _buildInputField(phoneController),
 
         const SizedBox(height: 40),
         // _buildRememberForgot(),
@@ -114,17 +114,30 @@ class _GetPhoneState extends State<GetPhone> {
   }
 
 
-  Widget _buildNameInputField(TextEditingController controller,
+  Widget _buildInputField(TextEditingController controller,
       {isPassword = false}) {
+    // Initialize the prefix text
+    final prefixText = "+998";
+
+    // Initialize the prefixStyle to style the prefix text
+    final prefixStyle = TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: mediaSize.width*0.04
+    );
+
     return TextField(
       controller: controller,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
-        suffixIcon: isPassword
-            ? Icon(Icons.remove_red_eye)
-            : Icon(Icons.phone),
+        prefixText: prefixText,
+        prefixStyle: prefixStyle,
+        suffixIcon: isPassword ? Icon(Icons.remove_red_eye) : Icon(Icons.phone),
       ),
       obscureText: isPassword,
+      // Disable text removal from the prefix
+      // inputFormatters: [
+      //   LengthLimitingTextInputFormatter(prefixText.length + 9),
+      // ],
     );
   }
 
@@ -132,13 +145,12 @@ class _GetPhoneState extends State<GetPhone> {
     return ElevatedButton(
       onPressed: () async {
         final connectivityResult = await (Connectivity().checkConnectivity());
-        if ((phoneController.text.length == 12) &&
-            (phoneController.text.startsWith("998"))){
+        if (phoneController.text.length == 9){
           if (connectivityResult != ConnectivityResult.none) {
-            box.put("temp_phone", phoneController.text);
+            box.put("temp_phone", "998${phoneController.text}");
             var request = http.MultipartRequest('POST', Uri.parse('https://mytok.uz/API/checkphonenumber.php'));
             request.fields.addAll({
-              'phonenumber': '${phoneController.text}'
+              'phonenumber': '998${phoneController.text}'
             });
             setState(() {
               _isLoading = true;
@@ -150,9 +162,9 @@ class _GetPhoneState extends State<GetPhone> {
               if (valueMap['registered'] == true){
                 final sixDigitNumber = random.nextInt(900000) + 100000;
                 var request2 = http.MultipartRequest('POST',
-                    Uri.parse('https://markaz.ideal-study.uz/api/sendSms'));
+                    Uri.parse('https://mytok.uz/flutterapi/sendsms.php'));
                 request2.fields.addAll({
-                  'phone': '${phoneController.text}',
+                  'phone': '998${phoneController.text}',
                   'code': '${sixDigitNumber}'
                 });
                 http.StreamedResponse response2 = await request2.send();

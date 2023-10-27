@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:mytok/screens/home_screen.dart';
 import 'package:mytok/screens/reset%20password/get_phone.dart';
@@ -127,15 +128,31 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _buildInputField(TextEditingController controller,
       {isPassword = false}) {
+    // Initialize the prefix text
+    final prefixText = "+998";
+
+    // Initialize the prefixStyle to style the prefix text
+    final prefixStyle = TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: mediaSize.width*0.04
+    );
+
     return TextField(
       controller: controller,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
+        prefixText: prefixText,
+        prefixStyle: prefixStyle,
         suffixIcon: isPassword ? Icon(Icons.remove_red_eye) : Icon(Icons.done),
       ),
       obscureText: isPassword,
+      // Disable text removal from the prefix
+      // inputFormatters: [
+      //   LengthLimitingTextInputFormatter(prefixText.length + 9),
+      // ],
     );
   }
+
 
   Widget _buildPasswordInputField(TextEditingController controller, isObscure) {
     return TextField(
@@ -176,11 +193,11 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildLoginButton() {
     return ElevatedButton(
       onPressed: () async {
+        print(emailController.text);
         final firebaseApi = FirebaseApi();
         final fcmToken = await firebaseApi.getFCMToken();
         final connectivityResult = await (Connectivity().checkConnectivity());
-        if ((emailController.text.length == 12) &&
-            (emailController.text.startsWith("998"))) {
+        if (emailController.text.length == 9) {
           if (passwordController.text.length < 8) {
             _onBasicAlertPressedValidatePassword(context);
           } else {
@@ -188,7 +205,7 @@ class _LoginPageState extends State<LoginPage> {
               var request = http.MultipartRequest(
                   'POST', Uri.parse('https://mytok.uz/API/loginAPI.php'));
               request.fields.addAll({
-                'phonenumber': '${emailController.text}',
+                'phonenumber': '998${emailController.text}',
                 'password': '${passwordController.text}'
               });
               setState(() {

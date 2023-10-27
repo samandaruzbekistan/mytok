@@ -34,35 +34,34 @@ class _MontajState extends State<Montaj> {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       setState(() {
-        _isLoading = false;
+        bool _isLoading = false;
       });
-      return _locationError(context);
+      await _locationError(context);
+      throw Exception("Location service is not enabled");
     }
 
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.deniedForever) {
-        setState(() {
-          _isLoading = false;
-        });
-        return _locationError(context);
-      }
+      setState(() {
+        bool _isLoading = false;
+      });
+      await _locationError(context);
+      throw Exception("Location permission denied");
     }
 
-    try {
-      var l = await Geolocator.getCurrentPosition();
+    if (permission == LocationPermission.deniedForever) {
       setState(() {
-        _locationSuccess = true;
+        bool _isLoading = false;
       });
-      return l;
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      return _locationError(context);
+      await _locationError(context);
+      throw Exception("Location permission denied forever");
     }
+
+    return await Geolocator.getCurrentPosition();
   }
+
+
 
   final List<String> data = [
     "Oddiy montaj",
@@ -164,41 +163,36 @@ class _MontajState extends State<Montaj> {
                     await (Connectivity().checkConnectivity());
                     if (connectivityResult != ConnectivityResult.none) {
                       final position = await _getCurrentLocation();
-                      if (_locationSuccess == true){
-                        setState(() {
-                          lat = '${position.latitude}';
-                          long = '${position.longitude}';
-                        });
-                        var request = http.MultipartRequest('POST', Uri.parse('https://mytok.uz/API/saveorder.php'));
-                        request.fields.addAll({
-                          'type': '0',
-                          'category': '${selectedValue}',
-                          'fullname': '${box.get('name')}',
-                          'phonenumber': '${phone}',
-                          'userid': '${box.get('id')}',
-                          'jobid': '0',
-                          'lat': lat,
-                          'long': long,
-                          'region_id': '${region_id}',
-                        });
+                      setState(() {
+                        lat = '${position.latitude}';
+                        long = '${position.longitude}';
+                      });
+                      var request = http.MultipartRequest('POST', Uri.parse('https://mytok.uz/API/saveorder.php'));
+                      request.fields.addAll({
+                        'type': '0',
+                        'category': '${selectedValue}',
+                        'fullname': '${box.get('name')}',
+                        'phonenumber': '${phone}',
+                        'userid': '${box.get('id')}',
+                        'jobid': '0',
+                        'lat': lat,
+                        'long': long,
+                        'region_id': '${region_id}',
+                      });
 
-                        http.StreamedResponse response = await request.send();
-                        if (response.statusCode == 200){
-                          var res = await response.stream.bytesToString();
-                          Map valueMap = json.decode(res);
-                          if (valueMap['success'] == true) {
-                            setState(() {
-                              _isLoading = false;
-                            });
-                            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => CheckCart()));
-                          }
-                        }
-                      }
-                      else{
+                      http.StreamedResponse response = await request.send();
+                      if (response.statusCode == 200){
                         setState(() {
                           _isLoading = false;
                         });
-                        _locationError(context);
+                        var res = await response.stream.bytesToString();
+                        Map valueMap = json.decode(res);
+                        if (valueMap['success'] == true) {
+                          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => CheckCart()));
+                        }
+                        else if(valueMap['status'] == false){
+                          _orderFound(context);
+                        }
                       }
                     }
                     else {
@@ -208,6 +202,9 @@ class _MontajState extends State<Montaj> {
                   else{
                     _selectError(context);
                   }
+                  setState(() {
+                    _isLoading = false;
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   // shape: const StadiumBorder(),
@@ -247,7 +244,9 @@ _formError(context) {
           "OK",
           style: TextStyle(color: Colors.white, fontSize: 14),
         ),
-        onPressed: () => Navigator.pop(context),
+        onPressed: () {
+          Navigator.pop(context);
+        },
         color: AppColors.black,
         radius: BorderRadius.circular(0.0),
       ),
@@ -277,12 +276,34 @@ _internetError(context) {
 }
 
 
-_locationError(context) {
+Future<void> _locationError(context) async {
+  await Alert(
+    context: context,
+    type: AlertType.warning,
+    title: "Xatolik!",
+    desc: "Joylashuvni olish uchun ilovaga ruhsat zarur. Qayta urinib ko'ring",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        onPressed: () {
+          Navigator.pop(context);
+        },
+        color: AppColors.black,
+        radius: BorderRadius.circular(0.0),
+      ),
+    ],
+  ).show();
+}
+
+_selectError(context) {
   Alert(
     context: context,
     type: AlertType.warning,
     title: "Xatolik!",
-    desc: "Joylashuv manzilini olish uchun ilovaga ruhsat bering",
+    desc: "Montaj turini tanlang",
     buttons: [
       DialogButton(
         child: Text(
@@ -297,12 +318,12 @@ _locationError(context) {
   ).show();
 }
 
-_selectError(context) {
+_orderFound(context) {
   Alert(
     context: context,
     type: AlertType.warning,
-    title: "Xatolik!",
-    desc: "Montaj turini tanlang",
+    title: "Ogoxlantirish!",
+    desc: "Sizda buyurtmalar mavjud",
     buttons: [
       DialogButton(
         child: Text(

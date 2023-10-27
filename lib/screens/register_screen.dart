@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:mytok/firebase_api.dart';
 import 'package:mytok/screens/sms_code.dart';
@@ -200,13 +201,28 @@ class _RegPageState extends State<RegPage> {
 
   Widget _buildPhoneInputField(TextEditingController controller,
       {isPassword = false}) {
+    // Initialize the prefix text
+    final prefixText = "+998";
+
+    // Initialize the prefixStyle to style the prefix text
+    final prefixStyle = TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 17
+    );
+
     return TextField(
       controller: controller,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
-        suffixIcon: isPassword ? Icon(Icons.remove_red_eye) : Icon(Icons.phone),
+        prefixText: prefixText,
+        prefixStyle: prefixStyle,
+        suffixIcon: isPassword ? Icon(Icons.remove_red_eye) : Icon(Icons.done),
       ),
       obscureText: isPassword,
+      // Disable text removal from the prefix
+      // inputFormatters: [
+      //   LengthLimitingTextInputFormatter(prefixText.length + 9),
+      // ],
     );
   }
 
@@ -228,13 +244,12 @@ class _RegPageState extends State<RegPage> {
       onPressed: () async {
         var region_ = findRegionById(selectedValue!);
         final connectivityResult = await (Connectivity().checkConnectivity());
-        if ((phoneController.text.length == 12) &&
-            (phoneController.text.startsWith("998"))) {
+        if (phoneController.text.length == 9) {
           if (passwordController.text.length > 7) {
             if (connectivityResult != ConnectivityResult.none) {
               var request = http.MultipartRequest('POST',
                   Uri.parse('https://mytok.uz/API/checkphonenumber.php'));
-              request.fields.addAll({'phonenumber': '${phoneController.text}'});
+              request.fields.addAll({'phonenumber': '998${phoneController.text}'});
               setState(() {
                 _isLoading = true;
               });
@@ -244,7 +259,7 @@ class _RegPageState extends State<RegPage> {
                 Map valueMap = json.decode(res);
                 if (valueMap['registered'] == false) {
                   box.put('temp_name', nameController.text);
-                  box.put('temp_phone', phoneController.text);
+                  box.put('temp_phone', "998${phoneController.text}");
                   box.put('temp_password', passwordController.text);
                   box.put('temp_region_id', selectedValue);
                   box.put('temp_region_name', region_['region']);
@@ -252,7 +267,7 @@ class _RegPageState extends State<RegPage> {
                   var request2 = http.MultipartRequest('POST',
                       Uri.parse('https://mytok.uz/flutterapi/sendsms.php'));
                   request2.fields.addAll({
-                    'phone': '${phoneController.text}',
+                    'phone': '998${phoneController.text}',
                     'code': '${sixDigitNumber}'
                   });
                   http.StreamedResponse response2 = await request2.send();
