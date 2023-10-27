@@ -34,7 +34,7 @@ class _MontajState extends State<Montaj> {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       setState(() {
-        bool _isLoading = false;
+        _isLoading = false;
       });
       await _locationError(context);
       throw Exception("Location service is not enabled");
@@ -44,7 +44,7 @@ class _MontajState extends State<Montaj> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       setState(() {
-        bool _isLoading = false;
+        _isLoading = false;
       });
       await _locationError(context);
       throw Exception("Location permission denied");
@@ -52,7 +52,7 @@ class _MontajState extends State<Montaj> {
 
     if (permission == LocationPermission.deniedForever) {
       setState(() {
-        bool _isLoading = false;
+        _isLoading = false;
       });
       await _locationError(context);
       throw Exception("Location permission denied forever");

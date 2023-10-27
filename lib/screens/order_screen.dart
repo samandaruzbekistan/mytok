@@ -40,7 +40,7 @@ class _OrderState extends State<Order> {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       setState(() {
-        bool _isLoading = false;
+        _isLoading = false;
       });
       await _locationError(context);
       throw Exception("Location service is not enabled");
@@ -50,7 +50,7 @@ class _OrderState extends State<Order> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       setState(() {
-        bool _isLoading = false;
+        _isLoading = false;
       });
       await _locationError(context);
       throw Exception("Location permission denied");
@@ -58,7 +58,7 @@ class _OrderState extends State<Order> {
 
     if (permission == LocationPermission.deniedForever) {
       setState(() {
-        bool _isLoading = false;
+        _isLoading = false;
       });
       await _locationError(context);
       throw Exception("Location permission denied forever");
@@ -66,6 +66,7 @@ class _OrderState extends State<Order> {
 
     return await Geolocator.getCurrentPosition();
   }
+
 
 
   @override
