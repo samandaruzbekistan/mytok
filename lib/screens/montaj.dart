@@ -27,22 +27,43 @@ class _MontajState extends State<Montaj> {
   late String lat;
   late String long;
   bool _isLoading = false;
+  bool _locationSuccess = false;
   List<DropdownMenuItem<String>> dropdownItems = [];
+
   Future<Position> _getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if(!serviceEnabled){
+    if (!serviceEnabled) {
+      setState(() {
+        _isLoading = false;
+      });
       return _locationError(context);
     }
+
     LocationPermission permission = await Geolocator.checkPermission();
-    if(permission == LocationPermission.denied){
+    if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.deniedForever) {
+        setState(() {
+          _isLoading = false;
+        });
+        return _locationError(context);
+      }
+    }
+
+    try {
+      var l = await Geolocator.getCurrentPosition();
+      setState(() {
+        _locationSuccess = true;
+      });
+      return l;
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
       return _locationError(context);
     }
-    if(permission == LocationPermission.deniedForever){
-      return _locationError(context);
-    }
-    return await Geolocator.getCurrentPosition();
   }
+
   final List<String> data = [
     "Oddiy montaj",
     "Pol yevro montaj",
@@ -135,7 +156,6 @@ class _MontajState extends State<Montaj> {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  print(selectedValue);
                   if(selectedValue != null){
                     setState(() {
                       _isLoading = true;
@@ -144,33 +164,41 @@ class _MontajState extends State<Montaj> {
                     await (Connectivity().checkConnectivity());
                     if (connectivityResult != ConnectivityResult.none) {
                       final position = await _getCurrentLocation();
-                      setState(() {
-                        lat = '${position.latitude}';
-                        long = '${position.longitude}';
-                      });
-                      var request = http.MultipartRequest('POST', Uri.parse('https://mytok.uz/API/saveorder.php'));
-                      request.fields.addAll({
-                        'type': '0',
-                        'category': '${selectedValue}',
-                        'fullname': '${box.get('name')}',
-                        'phonenumber': '${phone}',
-                        'userid': '${box.get('id')}',
-                        'jobid': '0',
-                        'lat': lat,
-                        'long': long,
-                        'region_id': '${region_id}',
-                      });
+                      if (_locationSuccess == true){
+                        setState(() {
+                          lat = '${position.latitude}';
+                          long = '${position.longitude}';
+                        });
+                        var request = http.MultipartRequest('POST', Uri.parse('https://mytok.uz/API/saveorder.php'));
+                        request.fields.addAll({
+                          'type': '0',
+                          'category': '${selectedValue}',
+                          'fullname': '${box.get('name')}',
+                          'phonenumber': '${phone}',
+                          'userid': '${box.get('id')}',
+                          'jobid': '0',
+                          'lat': lat,
+                          'long': long,
+                          'region_id': '${region_id}',
+                        });
 
-                      http.StreamedResponse response = await request.send();
-                      if (response.statusCode == 200){
-                        var res = await response.stream.bytesToString();
-                        Map valueMap = json.decode(res);
-                        if (valueMap['success'] == true) {
-                          setState(() {
-                            _isLoading = false;
-                          });
-                          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => CheckCart()));
+                        http.StreamedResponse response = await request.send();
+                        if (response.statusCode == 200){
+                          var res = await response.stream.bytesToString();
+                          Map valueMap = json.decode(res);
+                          if (valueMap['success'] == true) {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => CheckCart()));
+                          }
                         }
+                      }
+                      else{
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        _locationError(context);
                       }
                     }
                     else {
