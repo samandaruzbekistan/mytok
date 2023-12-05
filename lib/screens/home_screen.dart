@@ -1,3 +1,6 @@
+import 'dart:ffi';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:mytok/screens/contact.dart';
@@ -7,6 +10,8 @@ import 'package:mytok/screens/profile.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:mytok/utils/colors.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -18,6 +23,60 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
   var box = Hive.box('users');
+  bool isLoading = true;
+  List<dynamic> adData = [];
+  List<dynamic> data = [];
+  bool type = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _loadAdData();
+  }
+
+  Future<void> _loadAdData() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+
+    if (connectivityResult == ConnectivityResult.none) {
+      // No internet connection
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
+    // Fetch ad data from API
+    final apiUrl =
+        'https://mytok.uz/API/select_social.php'; // Replace with your API URL
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        // Successful API request
+        data = json.decode(response.body);
+        setState(() {
+          type = data[0]['type'];
+          adData = data;
+          isLoading = false;
+        });
+
+        print(adData);
+      } else {
+        // Handle API error
+        setState(() {
+          isLoading = false;
+        });
+        print('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Handle general error
+      setState(() {
+        isLoading = false;
+      });
+      print('Error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +111,10 @@ class _HomePageState extends State<HomePage> {
                     Row(
                       children: [
                         Icon(Icons.location_on_outlined, size: 18),
-                        Text('${region_name}', style: TextStyle(fontSize: 18),)
+                        Text(
+                          '${region_name}',
+                          style: TextStyle(fontSize: 18),
+                        )
                       ],
                     ),
                     Icon(
@@ -62,27 +124,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-                // const SizedBox(
-                //   height: 20,
-                // ),
-                // const Row(
-                //   mainAxisAlignment: MainAxisAlignment.center,
-                //   children: [
-                //     Padding(
-                //       padding: EdgeInsets.only(left: 3, bottom: 15),
-                //       child: Text(
-                //         "MyTok",
-                //         style: TextStyle(
-                //             fontWeight: FontWeight.w600,
-                //             fontSize: 30,
-                //             color: AppColors.black,
-                //             letterSpacing: 1,
-                //             wordSpacing: 1),
-                //         textAlign: TextAlign.center,
-                //       ),
-                //     ),
-                //   ],
-                // ),
               ],
             ),
           ),
@@ -90,21 +131,45 @@ class _HomePageState extends State<HomePage> {
             padding: EdgeInsets.only(top: 20, left: 15, right: 15),
             child: Column(
               children: [
-                // Text('Xizmatlarimiz', style: TextStyle(fontSize: 20),),
-                // SizedBox(
-                //   height: 20,
-                // ),
+                isLoading
+                    ? Text("Xizmatlar") // Show a loading indicator when data is loading
+                    : InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ElectrCategories(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          // padding: EdgeInsets.symmetric(
+                          //     vertical: 20, horizontal: 10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Color(0xFFF5F3FF),
+                          ),
+                          child: type
+                              ? Image.network("https://www.shutterstock.com/image-vector/blue-horizontal-lens-flares-pack-260nw-2202148279.jpg"),
+                              :
+                        ),
+                      ),
+                SizedBox(
+                  height: 10,
+                ),
                 InkWell(
                   onTap: () {
                     // Navigator.push(context,
                     //     MaterialPageRoute(builder: (context) => const TextLocation()));
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => const ElectrCategories()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ElectrCategories()));
                   },
                   child: Container(
                     width: (MediaQuery.of(context).size.width),
-                    padding:
-                        EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                    padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         color: Color(0xFFF5F3FF)),
@@ -114,8 +179,14 @@ class _HomePageState extends State<HomePage> {
                           padding: EdgeInsets.symmetric(horizontal: 80),
                           child: Image.asset("assets/images/electr.png"),
                         ),
-                        SizedBox(height: 20,),
-                        Text("Elektr ishlari", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),)
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "Elektr ishlari",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 25),
+                        )
                       ],
                     ),
                   ),
@@ -129,8 +200,7 @@ class _HomePageState extends State<HomePage> {
                   },
                   child: Container(
                     width: (MediaQuery.of(context).size.width),
-                    padding:
-                    EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                    padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         color: Color(0xFFF5F3FF)),
@@ -140,8 +210,14 @@ class _HomePageState extends State<HomePage> {
                           padding: EdgeInsets.symmetric(horizontal: 80),
                           child: Image.asset("assets/images/plumbing.png"),
                         ),
-                        SizedBox(height: 20,),
-                        Text("Santexnika ishlari", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),)
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "Santexnika ishlari",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 25),
+                        )
                       ],
                     ),
                   ),
@@ -157,7 +233,7 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: CurvedNavigationBar(
         key: _bottomNavigationKey,
         index: 0,
-        height: h*0.08,
+        height: h * 0.08,
         items: <Widget>[
           Icon(Icons.home, size: 30),
           Icon(Icons.history, size: 30),
@@ -170,19 +246,19 @@ class _HomePageState extends State<HomePage> {
         animationCurve: Curves.ease,
         animationDuration: Duration(milliseconds: 400),
         onTap: (index) {
-          if(index == 1){
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => MyOrders()));
-          }
-          else if(index == 2){
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => ContactScreen()));
-          }
-          else if(index == 3){
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => Profile()));
+          if (index == 1) {
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => MyOrders()));
+          } else if (index == 2) {
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => ContactScreen()));
+          } else if (index == 3) {
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => Profile()));
           }
         },
         letIndexChange: (index) => true,
       ),
-
 
       // bottomNavigationBar: BottomNavigationBar(
       //   showUnselectedLabels: true,
@@ -224,7 +300,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-
 _alert(context) {
   Alert(
     context: context,
@@ -244,4 +319,3 @@ _alert(context) {
     ],
   ).show();
 }
-
