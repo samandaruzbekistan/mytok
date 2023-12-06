@@ -131,7 +131,7 @@ class _MyOrdersState extends State<MyOrders> {
                   },
                   child: ListTile(
                       title: Text(item['category'] ?? ''),
-                      subtitle: Text(item['titile'] ?? ''),
+                      subtitle: _buildStatus(item['order_status']),
                       leading: _buildLeadingIcon(item['category']),
                       trailing: _buildIcon(item['order_status'])),
                 );
@@ -213,6 +213,14 @@ class _MyOrdersState extends State<MyOrders> {
         backgroundColor: AppColors.yellow,
         child: Icon(Icons.check),
       );
+    }
+  }
+
+  Widget _buildStatus(String category) {
+    if (category == "0") {
+      return Text("Hodim izlanmoqda");
+    } else {
+      return Text("Hodim topildi");
     }
   }
 }

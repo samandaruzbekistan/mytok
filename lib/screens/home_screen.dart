@@ -1,10 +1,12 @@
 import 'dart:ffi';
 
+// import 'package:chewie/chewie.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:mytok/screens/contact.dart';
 import 'package:mytok/screens/electr_categories.dart';
+import 'package:mytok/screens/handyman_categories.dart';
 import 'package:mytok/screens/orders.dart';
 import 'package:mytok/screens/profile.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
@@ -12,6 +14,10 @@ import 'package:mytok/utils/colors.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:video_player/video_player.dart';
+
+// import 'package:video_player/video_player.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -27,12 +33,20 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> adData = [];
   List<dynamic> data = [];
   bool type = false;
+  late VideoPlayerController _controller;
+
+
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _loadAdData();
+    _controller = VideoPlayerController.networkUrl(Uri.parse(
+        'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4'))
+      ..initialize().then((_) {
+        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+        setState(() {});
+      });
   }
 
   Future<void> _loadAdData() async {
@@ -55,13 +69,23 @@ class _HomePageState extends State<HomePage> {
       if (response.statusCode == 200) {
         // Successful API request
         data = json.decode(response.body);
-        setState(() {
-          type = data[0]['type'];
-          adData = data;
-          isLoading = false;
-        });
-
-        print(adData);
+        if(data.isNotEmpty){
+          if (data[0]['type'] == "video") {
+            setState(() {
+              // _initializeVideoPlayer(data[0]['file_link']);
+              type = true;
+              adData = data;
+              isLoading = false;
+              ;
+            });
+          } else {
+            setState(() {
+              type = false;
+              adData = data;
+              isLoading = false;
+            });
+          }
+        }
       } else {
         // Handle API error
         setState(() {
@@ -82,6 +106,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     var h = MediaQuery.of(context).size.height;
     var region_name = box.get('region_name');
+
     return Scaffold(
       body: ListView(
         children: [
@@ -103,11 +128,6 @@ class _HomePageState extends State<HomePage> {
                       child: Image.asset("assets/images/logo.png"),
                       width: 40,
                     ),
-                    // Icon(
-                    //   Icons.dashboard,
-                    //   size: 30,
-                    //   color: Colors.white,
-                    // ),
                     Row(
                       children: [
                         Icon(Icons.location_on_outlined, size: 18),
@@ -132,7 +152,8 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               children: [
                 isLoading
-                    ? Text("Xizmatlar") // Show a loading indicator when data is loading
+                    ? Text(
+                        "Xizmatlar") // Show a loading indicator when data is loading
                     : InkWell(
                         onTap: () {
                           Navigator.push(
@@ -150,9 +171,15 @@ class _HomePageState extends State<HomePage> {
                             borderRadius: BorderRadius.circular(20),
                             color: Color(0xFFF5F3FF),
                           ),
-                          child: type
-                              ? Image.network("https://www.shutterstock.com/image-vector/blue-horizontal-lens-flares-pack-260nw-2202148279.jpg"),
-                              :
+                          child: type?
+                              SizedBox(height: 1,)
+                              // ? Container(
+                              //     height: 200, // Set a fixed height here
+                              //     child: Chewie(controller: _chewieController),
+                              //   )
+                              : Image.network(
+                                  "http://manager.mytok.uz/admin/dashboard/controller/social_files/" +
+                                      "${adData[0]['file_link']}"),
                         ),
                       ),
                 SizedBox(
@@ -196,7 +223,11 @@ class _HomePageState extends State<HomePage> {
                 ),
                 InkWell(
                   onTap: () {
-                    _alert(context);
+                    // _alert(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const HandymanCategories()));
                   },
                   child: Container(
                     width: (MediaQuery.of(context).size.width),
@@ -298,6 +329,12 @@ class _HomePageState extends State<HomePage> {
       // ),
     );
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
 }
 
 _alert(context) {
@@ -318,4 +355,6 @@ _alert(context) {
       ),
     ],
   ).show();
+
+
 }
