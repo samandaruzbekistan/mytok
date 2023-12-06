@@ -13,6 +13,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:mytok/utils/colors.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 
 import 'package:video_player/video_player.dart';
@@ -41,12 +42,19 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _loadAdData();
+  }
+
+  void playVideo(String link){
     _controller = VideoPlayerController.networkUrl(Uri.parse(
-        'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4'))
+        'https://manager.mytok.uz/admin/dashboard/controller/social_files/'+link))
       ..initialize().then((_) {
+
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
         setState(() {});
       });
+    print('http://manager.mytok.uz/admin/dashboard/controller/social_files/'+link);
+    _controller.play();
+    _controller.setLooping(true);
   }
 
   Future<void> _loadAdData() async {
@@ -73,6 +81,7 @@ class _HomePageState extends State<HomePage> {
           if (data[0]['type'] == "video") {
             setState(() {
               // _initializeVideoPlayer(data[0]['file_link']);
+              playVideo(data[0]['file_link']);
               type = true;
               adData = data;
               isLoading = false;
@@ -156,12 +165,8 @@ class _HomePageState extends State<HomePage> {
                         "Xizmatlar") // Show a loading indicator when data is loading
                     : InkWell(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ElectrCategories(),
-                            ),
-                          );
+                          print(adData);
+                          launchUrl(Uri.parse(adData[0]['text']));
                         },
                         child: Container(
                           width: MediaQuery.of(context).size.width,
@@ -172,13 +177,15 @@ class _HomePageState extends State<HomePage> {
                             color: Color(0xFFF5F3FF),
                           ),
                           child: type?
-                              SizedBox(height: 1,)
-                              // ? Container(
-                              //     height: 200, // Set a fixed height here
-                              //     child: Chewie(controller: _chewieController),
-                              //   )
+                                _controller.value.isInitialized
+                                ? AspectRatio(
+                                aspectRatio: _controller.value.aspectRatio,
+                                child: VideoPlayer(_controller),
+                                )
+                                    : Container()
+
                               : Image.network(
-                                  "http://manager.mytok.uz/admin/dashboard/controller/social_files/" +
+                                  "https://manager.mytok.uz/admin/dashboard/controller/social_files/" +
                                       "${adData[0]['file_link']}"),
                         ),
                       ),
