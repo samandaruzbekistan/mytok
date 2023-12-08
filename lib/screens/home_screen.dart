@@ -54,6 +54,7 @@ class _HomePageState extends State<HomePage> {
       });
     print('http://manager.mytok.uz/admin/dashboard/controller/social_files/'+link);
     _controller.play();
+    _controller.setVolume(0);
     _controller.setLooping(true);
   }
 
