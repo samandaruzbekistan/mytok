@@ -176,7 +176,6 @@ class _OrderHandymanState extends State<OrderHandyman> {
                   setState(() {
                     _isLoading = false;
                   });
-
                 },
                 style: ElevatedButton.styleFrom(
                   // shape: const StadiumBorder(),
